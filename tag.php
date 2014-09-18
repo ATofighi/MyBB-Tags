@@ -83,8 +83,8 @@ if(!$name)
 			<form action="{$tag_link}" method="get">
 			<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder clear">
 				<tr>
-					<td class="thead" colspan="10">
-						Search
+					<td class="thead" colspan="2">
+						<strong>Search</strong>
 					</td>
 				</tr>
 				<tr>
@@ -164,7 +164,7 @@ else
 		$tag['profilelink'] = build_profile_link($tag['username'], $tag['uid']);
 		$tags .= <<<EOT
 	<tr>
-		<td class="tcat" colspan="10">
+		<td class="tcat" colspan="2">
 			<div class="float_{$no_dir}">
 				By: {$tag['profilelink']} - Replies: <a href="javascript:MyBB.whoPosted({$tag['tid']});">{$tag['replies']}</a> - Views: {$tag['views']}
 			</div>
@@ -172,7 +172,7 @@ else
 		</td>
 	</tr>
 	<tr>
-		<td class="trow1" colspan="10">
+		<td class="trow1" colspan="2">
 			<div style="max-height:100px;overflow:auto">
 				{$tag['message']}
 			</div>
@@ -197,8 +197,8 @@ EOT;
 			<form action="{$tag_link}" method="get">
 			<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder clear">
 				<tr>
-					<td class="thead" colspan="10">
-						Tags
+					<td class="thead" colspan="2">
+						<strong>Tags</strong>
 					</td>
 				</tr>
 				<tr>

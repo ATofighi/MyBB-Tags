@@ -457,7 +457,7 @@ EOT;
 <table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
 	<tr>
 		<td class="thead">
-			Tags
+			<strong>Tags</strong>
 		</td>
 	</tr>
 	<tr>
