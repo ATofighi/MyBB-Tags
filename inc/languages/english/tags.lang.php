@@ -17,3 +17,4 @@ $l['tags_author'] = "Author";
 $l['tags_replies'] = "Replies";
 $l['tags_views'] = "Views";
 $l['tags_notags'] = "Sorry, but no results were returned using the query information you provided. Please redefine your tag and try again.";
+$l['tags_disabled'] = 'Sorry, but tags is disabled.';

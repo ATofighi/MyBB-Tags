@@ -113,41 +113,83 @@ function tags_install()
 		"sid" => "-1",
 	);
 
-	$db->insert_query("templates", $templatearray);
+	$db->insert_query("templates", $templatearray);*/
 
 	// create settings group
 	$insertarray = array(
-		'name' => 'hello', 
-		'title' => 'Test Plugin', 
-		'description' => "Settings for Test Plugin.", 
+		'name' => 'tags', 
+		'title' => 'Tags Plugin', 
+		'description' => "Settings for Tags Plugin.", 
 		'disporder' => 100,
 		'isdefault' => 0
 	);
 	$gid = $db->insert_query("settinggroups", $insertarray);
 	
 	// add settings
-	$setting = array(
-		"name"			=> "hello_display1",
-		"title"			=> "Display Message Index",
-		"description"	=> "Set to no if you do not want to display the messages on index.",
-		"optionscode"	=> "yesno",
-		"value"			=> 1,
-		"disporder"		=> 1,
-		"gid"			=> $gid
+	$i = 0;
+	$settings = array(
+		array(
+			"name"			=> "tags_enabled",
+			"title"			=> "Enable Plugin",
+			"description"	=> $db->escape_string('Set to "on" if you want Enable this plugin.'),
+			"optionscode"	=> "onoff",
+			"value"			=> 1,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_seo",
+			"title"			=> "SEO Friendly URL",
+			"description"	=> $db->escape_string('Do you want to use Seo URLs tags-***.html for tags?<br />
+You must add these codes to ".htaccess" file before set it to "On":
+<pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
+RewriteEngine <strong>on</strong>
+RewriteRule <strong>^tag-(.*?)\.html$ tag.php?name=$1</strong> <em>[L,QSA]</em>
+RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
+</pre>'),
+			"optionscode"	=> "yesno",
+			"value"			=> 0,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_per_page",
+			"title"			=> "Tags per page",
+			"description"	=> $db->escape_string('How many tags shown in "Tags" page?'),
+			"optionscode"	=> "text",
+			"value"			=> 10,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_limit",
+			"title"			=> $db->escape_string('Limit Tags in "Index Page" and "Forum Display Page"'),
+			"description"	=> $db->escape_string('How many tags shown in "Index Page" and "Forum Display Page" ?'),
+			"optionscode"	=> "text",
+			"value"			=> 50,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_index",
+			"title"			=> $db->escape_string('Show tags in Index Page?'),
+			"description"	=> $db->escape_string('Do you want tags shown in Index Page?'),
+			"optionscode"	=> "yesno",
+			"value"			=> 1,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_forumdisplay",
+			"title"			=> $db->escape_string('Show tags in "Forum Display" Page?'),
+			"description"	=> $db->escape_string('Do you want tags shown in "Forum Display" Page?'),
+			"optionscode"	=> "yesno",
+			"value"			=> 1,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		)
 	);
-	$db->insert_query("settings", $setting);
-	
-	// add settings
-	$setting = array(
-		"name"			=> "hello_display2",
-		"title"			=> "Display Message Postbit",
-		"description"	=> "Set to no if you do not want to display the messages below every post.",
-		"optionscode"	=> "yesno",
-		"value"			=> 1,
-		"disporder"		=> 2,
-		"gid"			=> $gid
-	);
-	$db->insert_query("settings", $setting);*/
+	$db->insert_query_multiple("settings", $settings);
 	
 
 	rebuild_settings();
@@ -183,11 +225,11 @@ function tags_uninstall()
 {
 	global $db, $mybb;
 	
-/*	$db->delete_query('templates', "title IN ('tags_index') AND sid='-1'");
+	//$db->delete_query('templates', "title LIKE 'tags' AND sid='-1'");
 
 	$db->delete_query("settinggroups", "name = 'tags'");
 	
-	$db->delete_query('settings', "name IN ('hello_display1', 'hello_display2')");*/
+	$db->delete_query('settings', "name LIKE 'tags\_%'");
 	
 	rebuild_settings();
 	
@@ -208,12 +250,29 @@ function tags_string2tag($s)
 	return $s;
 }
 
+function tags_current_url()
+{
+	$pageURL = 'http';
+	if ($_SERVER["HTTPS"] == "on") {
+		$pageURL .= "s";
+	}
+	$pageURL .= "://";
+	if ($_SERVER["SERVER_PORT"] != "80") {
+		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+	}
+	else
+	{
+		$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+	}
+	return $pageURL;
+}
+
 $plugins->add_hook("global_start", "tags_global");
 
 function tags_global()
 {
 	global $mybb;
-	if($mybb->seo_support)
+	if($mybb->settings['tags_seo'])
 	{
 		define('TAG_URL', "tag-{name}.html");
 		define('TAG_URL_PAGE', "tag.html");
@@ -243,6 +302,11 @@ $plugins->add_hook("newthread_start", "tags_newthread");
 function tags_newthread()
 {
 	global $mybb, $db, $tags, $tags_value, $lang;
+
+	if($mybb->settings['tags_enabled'] == 0)
+	{
+		return;
+	}
 
 	$lang->load('tags');
 
@@ -276,6 +340,11 @@ $plugins->add_hook("newthread_do_newthread_end", "tags_newthread_done");
 function tags_newthread_done()
 {
 	global $mybb, $db, $tid;
+
+	if($mybb->settings['tags_enabled'] == 0)
+	{
+		return;
+	}
 
 	$tags_value = $mybb->get_input('tags');
 	$tags_value = tags_string2tag($tags_value);
@@ -312,6 +381,12 @@ $plugins->add_hook("editpost_end", "tags_editpost");
 function tags_editpost()
 {
 	global $mybb, $db, $lang, $thread, $post, $tags, $tags_value;
+
+	if($mybb->settings['tags_enabled'] == 0)
+	{
+		return;
+	}
+
 	$lang->load('tags');
 
 	if($thread['firstpost'] != $post['pid'])
@@ -361,6 +436,11 @@ function tags_editpost_done()
 {
 	global $mybb, $db, $tid, $thread, $post;
 
+	if($mybb->settings['tags_enabled'] == 0)
+	{
+		return;
+	}
+
 	if($thread['firstpost'] != $post['pid'])
 	{
 		return;
@@ -397,6 +477,12 @@ $plugins->add_hook("showthread_start", "tags_showthread");
 function tags_showthread()
 {
 	global $mybb, $db, $theme, $lang, $thread, $tags, $collapsedimg, $collapsed;
+
+	if($mybb->settings['tags_enabled'] == 0)
+	{
+		return;
+	}
+
 	$lang->load('tags');
 
 	$subject = $thread['subject'];
@@ -446,6 +532,8 @@ EOT;
 		$i++;
 	}
 
+	if($tags != '')
+	{
 	$tags = <<<EOT
 <br class="clear" />
 <table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
@@ -468,6 +556,7 @@ EOT;
 <br class="clear" />
 		
 EOT;
+	}
 }
 
 
@@ -476,7 +565,15 @@ $plugins->add_hook("index_start", "tags_index");
 function tags_index()
 {
 	global $mybb, $db, $tags, $theme, $lang, $collapsedimg, $collapsed;
+
+	if($mybb->settings['tags_enabled'] == 0 || $mybb->settings['tags_index'] == 0)
+	{
+		return;
+	}
+
 	$lang->load('tags');
+	
+	$mybb->settings['tags_limit'] = (int)($mybb->settings['tags_limit']);
 
 	// get forums user cannot view
 	$unviewable = get_unviewable_forums(true);
@@ -508,7 +605,7 @@ function tags_index()
 						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY tag.hash
 						 ORDER BY RAND()
-						 LIMIT 0, 80");
+						 LIMIT 0, {$mybb->settings['tags_limit']}");
 	$tags = '';
 
 	while($tag = $db->fetch_array($query))
@@ -556,6 +653,8 @@ function tags_index()
 EOT;
 	}
 
+	if($tags != '')
+	{
 	$tags = <<<EOT
 <br class="clear" />
 <table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
@@ -577,13 +676,22 @@ EOT;
 		</td>
 <br class="clear" />
 EOT;
+	}
 }
 $plugins->add_hook("forumdisplay_end", "tags_forumdisplay");
 
 function tags_forumdisplay()
 {
 	global $mybb, $db, $lang, $tags, $theme, $collapsedimg, $collapsed, $fid;
+
+	if($mybb->settings['tags_enabled'] == 0 || $mybb->settings['tags_forumdisplay'] == 0)
+	{
+		return;
+	}
+
 	$lang->load('tags');
+
+	$mybb->settings['tags_limit'] = (int)($mybb->settings['tags_limit']);
 
 	// get forums user cannot view
 	$unviewable = get_unviewable_forums(true);
@@ -615,7 +723,7 @@ function tags_forumdisplay()
 						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1' AND thread.fid = '{$fid}' AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY tag.hash
 						 ORDER BY RAND()
-						 LIMIT 0, 80");
+						 LIMIT 0, {$mybb->settings['tags_limit']}");
 	$tags = '';
 
 	while($tag = $db->fetch_array($query))

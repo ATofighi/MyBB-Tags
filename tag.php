@@ -29,6 +29,13 @@ $parser_options['filter_badwords'] = 1;
 
 $lang->load('tags');
 
+
+if($mybb->settings['tags_enabled'] == 0)
+{
+	error($lang->tags_disabled);
+}
+
+
 $dir = 'left';
 $no_dir = 'right';
 if($lang->settings['rtl'])
@@ -61,14 +68,29 @@ else
 	$inactivewhere = '';
 }
 
+$page = $mybb->get_input('page', 1);
+
 $name = $mybb->get_input('name');
 $name = $parser->parse_badwords($name);
 $name = tags_string2tag($name);
 $name = htmlspecialchars_uni($name);
 $hash = md5($name);
+$mybb->settings['tags_per_page'] = (int)($mybb->settings['tags_per_page']);
+if($mybb->settings['tags_per_page'] <= 0 || $mybb->settings['tags_per_page'] >= 100)
+{
+	$mybb->settings['tags_per_page'] = 10;
+}
+
 add_breadcrumb($lang->tags, get_tag_link());
 
 $tag_link = get_tag_link();
+
+
+if($name && $mybb->settings['tags_seo'] && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($name) && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($name)."?page={$page}" && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($name)."&page={$page}")
+{
+	header("location: ".get_tag_link($name));
+	exit;
+}
 
 if(!$name)
 {
@@ -114,8 +136,7 @@ else
 						 limit 1");
 	$nums = $db->fetch_array($query);
 	$count = $nums['numrows'];
-	$page = $mybb->get_input('page', 1);
-	$pages = $count / 10;
+	$pages = $count / $mybb->settings['tags_per_page'];
 	$pages = ceil($pages);
 
 	if($page > $pages || $page <= 0)
@@ -125,7 +146,7 @@ else
 
 	if($page)
 	{
-		$start = ($page-1) * 10;
+		$start = ($page-1) * $mybb->settings['tags_per_page'];
 	}
 	else
 	{
@@ -133,14 +154,14 @@ else
 		$page = 1;
 	}
 
-	$multipage = multipage($count, 10, $page, get_tag_link($name));
+	$multipage = multipage($count, $mybb->settings['tags_per_page'], $page, get_tag_link($name));
 
 	$query = $db->query("SELECT thread.tid, post.message, post.username, post.uid, thread.subject, thread.views, thread.replies from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
 						 WHERE tag.hash = '{$hash}' And thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY thread.tid
-						LIMIT {$start}, 10");
+						LIMIT {$start}, {$mybb->settings['tags_per_page']}");
 
 	$tags = '';
 	while($tag = $db->fetch_array($query))
