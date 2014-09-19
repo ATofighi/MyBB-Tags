@@ -61,8 +61,7 @@ else
 
 $name = $mybb->get_input('name');
 $name = $parser->parse_badwords($name);
-$name = ltrim(rtrim(trim($name)));
-$name = my_strtolower($name);
+$name = tags_string2tag($name);
 $name = htmlspecialchars_uni($name);
 $hash = md5($name);
 add_breadcrumb('Tags', get_tag_link());
@@ -88,10 +87,10 @@ if(!$name)
 					</td>
 				</tr>
 				<tr>
-					<td class="trow1">
+					<td class="trow2">
 						<input type="text" class="textbox" placeholder="Please enter a tag..." name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" />
 					</td>
-					<td class="trow1" width="50">
+					<td class="trow2" width="50">
 						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="Go" />
 					</td>
 				</tr>
@@ -166,7 +165,7 @@ else
 	<tr>
 		<td class="tcat" colspan="2">
 			<div class="float_{$no_dir}">
-				By: {$tag['profilelink']} - Replies: <a href="javascript:MyBB.whoPosted({$tag['tid']});">{$tag['replies']}</a> - Views: {$tag['views']}
+				By: <strong>{$tag['profilelink']}</strong> - Replies: <a href="javascript:MyBB.whoPosted({$tag['tid']});">{$tag['replies']}</a> - Views: {$tag['views']}
 			</div>
 			<a href="{$tag['threadlink']}{$highlight}"><strong>{$tag['subject']}</strong></a>
 		</td>
@@ -183,7 +182,13 @@ EOT;
 
 	if($tags == '')
 	{
-		error("We can't find anything for this Tag");
+		$tags = <<<EOT
+<tr>
+	<td class="trow1" colspan="2">
+		We can't find anything for this Tag
+	</td>
+</tr>
+EOT;
 	}
 
 	$tag = <<<EOT
@@ -202,10 +207,10 @@ EOT;
 					</td>
 				</tr>
 				<tr>
-					<td class="trow1">
+					<td class="trow2">
 						<input type="text" class="textbox" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$name}" />
 					</td>
-					<td class="trow1" width="50">
+					<td class="trow2" width="50">
 						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="Go" />
 					</td>
 				</tr>

@@ -57,6 +57,8 @@ function tags_activate()
 	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$ratethread}').'#', '{$ratethread}{$tags}');
+	find_replace_templatesets('index', '#'.preg_quote('{$forums}').'#', '{$forums}{$tags}');
+	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$threadslist}').'#', '{$threadslist}{$tags}');
 }
 
 function tags_deactivate()
@@ -69,6 +71,8 @@ function tags_deactivate()
 	find_replace_templatesets('newthread', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$tags}').'#', '');
+	find_replace_templatesets('index', '#'.preg_quote('{$tags}').'#', '');
+	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$tags}').'#', '');
 }
 
 function tags_install()
@@ -200,6 +204,7 @@ function tags_string2tag($s)
 	$s = ltrim(rtrim(trim($s)));
 	$s = str_replace(array("`","~","!","@","#","$","%","^","&","*","(",")","_","+","-","=","\\","|","]","[","{","}",'"',"'",";",":","/","."," ",">","<"), ",", $s);
 	$s = ltrim(rtrim(trim($s, ','),','),',');
+	$s = preg_replace("#([,]+)#si", ',', $s);
 	return $s;
 }
 
@@ -271,7 +276,7 @@ function tags_newthread_done()
 	global $mybb, $db, $tid;
 
 	$tags_value = $mybb->get_input('tags');
-	$tags_value = tags_string2tag($tag_value);
+	$tags_value = tags_string2tag($tags_value);
 	$tags = explode(',', $tags_value);
 	$subject = $mybb->get_input('subject');
 	$subject = tags_string2tag($subject);
@@ -388,7 +393,7 @@ $plugins->add_hook("showthread_start", "tags_showthread");
 
 function tags_showthread()
 {
-	global $mybb, $db, $theme, $thread, $tags;
+	global $mybb, $db, $theme, $thread, $tags, $collapsedimg, $collapsed;
 	$subject = $thread['subject'];
 	$tid = $thread['tid'];
 	$thread['tags'] = array();
@@ -439,18 +444,240 @@ EOT;
 	$tags = <<<EOT
 <br class="clear" />
 <table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
+	<thead>
 	<tr>
 		<td class="thead">
+			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
 			<strong>Tags</strong>
 		</td>
 	</tr>
+	</thead>
+	<tbody style="{$collapsed['tags_e']}" id="tags_e">
 	<tr>
 		<td class="trow1">
 			{$tags}
 		</td>
 	</tr>
+	</tbody>
 </table>
 <br class="clear" />
 		
 EOT;
+}
+
+
+$plugins->add_hook("index_start", "tags_index");
+
+function tags_index()
+{
+	global $mybb, $db, $tags, $theme, $collapsedimg, $collapsed;
+
+	// get forums user cannot view
+	$unviewable = get_unviewable_forums(true);
+	if($unviewable)
+	{
+		$unviewwhere = " AND fid NOT IN ($unviewable)";
+		$tunviewwhere = " AND thread.fid NOT IN ($unviewable)";
+	}
+	else
+	{
+		$unviewwhere = '';
+	}
+
+	// get inactive forums
+	$inactive = get_inactive_forums();
+	if($inactive)
+	{
+		$inactivewhere = " AND fid NOT IN ($inactive)";
+		$tinactivewhere = " AND thread.fid NOT IN ($inactive)";
+	}
+	else
+	{
+		$inactivewhere = '';
+	}
+
+	$query = $db->query("SELECT SUM(thread.views) as sumviews, tag.name from `".TABLE_PREFIX."tags` tag
+						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
+						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
+						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 GROUP BY tag.hash
+						 ORDER BY RAND()
+						 LIMIT 0, 80");
+	$tags = '';
+
+	while($tag = $db->fetch_array($query))
+	{
+		$tag['name'] = htmlspecialchars_uni($tag['name']);
+		$tag['tag_link'] = get_tag_link($tag['name']);
+		if($tag['sumviews'] > 5000)
+		{
+			$tag['size'] = '48';
+		}
+		elseif($tag['sumviews'] > 3000)
+		{
+			$tag['size'] = '40';
+		}
+		elseif($tag['sumviews'] > 1000)
+		{
+			$tag['size'] = '32';
+		}
+		elseif($tag['sumviews'] > 500)
+		{
+			$tag['size'] = '24';
+		}
+		elseif($tag['sumviews'] > 250)
+		{
+			$tag['size'] = '18';
+		}
+		elseif($tag['sumviews'] > 100)
+		{
+			$tag['size'] = '16';
+		}
+		elseif($tag['sumviews'] > 50)
+		{
+			$tag['size'] = '14';
+		}
+		elseif($tag['sumviews'] > 10)
+		{
+			$tag['size'] = '12';
+		}
+		else
+		{
+			$tag['size'] = '8';
+		}
+		$tags .= <<<EOT
+<a href="{$tag['tag_link']}" style="font-size:{$tag['size']}px">{$tag['name']}</a> 
+EOT;
+	}
+
+	$tags = <<<EOT
+<br class="clear" />
+<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
+	<thead>
+	<tr>
+		<td class="thead">
+			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
+			<strong>Tags</strong>
+		</td>
+	</tr>
+	<thead>
+	<tbody style="{$collapsed['tags_e']}" id="tags_e">
+	<tr>
+		<td class="trow1">
+			{$tags}
+	</tr>
+	</tbody>
+</table>
+		</td>
+<br class="clear" />
+EOT;
+}
+$plugins->add_hook("forumdisplay_end", "tags_forumdisplay");
+
+function tags_forumdisplay()
+{
+	global $mybb, $db, $tags, $theme, $collapsedimg, $collapsed, $fid;
+
+	// get forums user cannot view
+	$unviewable = get_unviewable_forums(true);
+	if($unviewable)
+	{
+		$unviewwhere = " AND fid NOT IN ($unviewable)";
+		$tunviewwhere = " AND thread.fid NOT IN ($unviewable)";
+	}
+	else
+	{
+		$unviewwhere = '';
+	}
+
+	// get inactive forums
+	$inactive = get_inactive_forums();
+	if($inactive)
+	{
+		$inactivewhere = " AND fid NOT IN ($inactive)";
+		$tinactivewhere = " AND thread.fid NOT IN ($inactive)";
+	}
+	else
+	{
+		$inactivewhere = '';
+	}
+
+	$query = $db->query("SELECT SUM(thread.views) as sumviews, tag.name from `".TABLE_PREFIX."tags` tag
+						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
+						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
+						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1' AND thread.fid = '{$fid}' AND thread.closed NOT LIKE 'moved|%'
+						 GROUP BY tag.hash
+						 ORDER BY RAND()
+						 LIMIT 0, 80");
+	$tags = '';
+
+	while($tag = $db->fetch_array($query))
+	{
+		$tag['name'] = htmlspecialchars_uni($tag['name']);
+		$tag['tag_link'] = get_tag_link($tag['name']);
+		if($tag['sumviews'] > 5000)
+		{
+			$tag['size'] = '48';
+		}
+		elseif($tag['sumviews'] > 3000)
+		{
+			$tag['size'] = '40';
+		}
+		elseif($tag['sumviews'] > 1000)
+		{
+			$tag['size'] = '32';
+		}
+		elseif($tag['sumviews'] > 500)
+		{
+			$tag['size'] = '24';
+		}
+		elseif($tag['sumviews'] > 250)
+		{
+			$tag['size'] = '18';
+		}
+		elseif($tag['sumviews'] > 100)
+		{
+			$tag['size'] = '16';
+		}
+		elseif($tag['sumviews'] > 50)
+		{
+			$tag['size'] = '14';
+		}
+		elseif($tag['sumviews'] > 10)
+		{
+			$tag['size'] = '12';
+		}
+		else
+		{
+			$tag['size'] = '8';
+		}
+		$tags .= <<<EOT
+<a href="{$tag['tag_link']}" style="font-size:{$tag['size']}px">{$tag['name']}</a> 
+EOT;
+	}
+
+	if($tags != '')
+	{
+	$tags = <<<EOT
+<br class="clear" />
+<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
+	<thead>
+	<tr>
+		<td class="thead">
+			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
+			<strong>Tags</strong>
+		</td>
+	</tr>
+	<thead>
+	<tbody style="{$collapsed['tags_e']}" id="tags_e">
+	<tr>
+		<td class="trow1">
+			{$tags}
+	</tr>
+	</tbody>
+</table>
+		</td>
+<br class="clear" />
+EOT;
+	}
 }
