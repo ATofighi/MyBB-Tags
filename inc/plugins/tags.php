@@ -31,13 +31,6 @@ if(defined('THIS_SCRIPT') && THIS_SCRIPT== 'index.php')
 }
 */
 
-$plugins->add_hook("global_start", "tags_global");
-$plugins->add_hook("newthread_start", "tags_newthread");
-$plugins->add_hook("newthread_do_newthread_end", "tags_newthread_done");
-$plugins->add_hook("editpost_end", "tags_editpost");
-$plugins->add_hook("editpost_do_editpost_end", "tags_editpost_done");
-$plugins->add_hook("showthread_start", "tags_showthread");
-
 function tags_info()
 {
 	global $lang;
@@ -168,15 +161,6 @@ function tags_install()
 		  PRIMARY KEY  (`id`)
 			) ENGINE=MyISAM{$collation}");
 	}
-
-	if(!$db->field_exists("tags", "threads"))
-	{
-		$db->write_query("ALTER TABLE ".TABLE_PREFIX."threads ADD `tags` text NOT NULL, ADD `tags_hash` text NOT NULL");
-	}
-	elseif(!$db->field_exists("tags", "tags_hash"))
-	{
-		$db->write_query("ALTER TABLE ".TABLE_PREFIX."threads ADD `tags_hash` text NOT NULL");
-	}
 }
 
 function tags_is_installed()
@@ -207,11 +191,7 @@ function tags_uninstall()
 	{
 		$db->drop_table('tags');
 	}
-	
-	if($db->field_exists("tags", "threads"))
-	{
-		$db->query("ALTER TABLE ".TABLE_PREFIX."threads DROP tags, DROP tags_hash");
-	}
+
 }
 
 function tags_string2tag($s)
@@ -222,6 +202,8 @@ function tags_string2tag($s)
 	$s = ltrim(rtrim(trim($s, ','),','),',');
 	return $s;
 }
+
+$plugins->add_hook("global_start", "tags_global");
 
 function tags_global()
 {
@@ -251,6 +233,8 @@ function get_tag_link($name='')
 	return htmlspecialchars_uni($link);
 }
 
+$plugins->add_hook("newthread_start", "tags_newthread");
+
 function tags_newthread()
 {
 	global $mybb, $db, $tags, $tags_value;
@@ -279,6 +263,8 @@ function tags_newthread()
 </script>
 EOT;
 }
+
+$plugins->add_hook("newthread_do_newthread_end", "tags_newthread_done");
 
 function tags_newthread_done()
 {
@@ -311,11 +297,10 @@ function tags_newthread_done()
 	$tags_hash = implode(',', $tags_hash_arr);
 
 	$db->insert_query_multiple("tags", $tags_insert);
-	$db->update_query("threads", array(
-		"tags" => ','.$tags_value.',',
-		"tags_hash" => ','.$tags_hash.','
-	), "tid='{$tid}'", 1);
 }
+
+
+$plugins->add_hook("editpost_end", "tags_editpost");
 
 function tags_editpost()
 {
@@ -329,7 +314,13 @@ function tags_editpost()
 	$tags_value = $mybb->get_input('tags');
 	if(!$tags_value)
 	{
-		$tags_value = $thread['tags'];
+		$query = $db->simple_select('tags', '*', "tid='{$thread['tid']}'");
+		$thread['tags'] = array();
+		while($tag = $db->fetch_array($query))
+		{
+			array_push($thread['tags'], $tag['name']);
+		}		
+		$tags_value = implode(',',$thread['tags']);
 	}
 	$tags_value = htmlspecialchars_uni(tags_string2tag($tags_value));
 
@@ -355,6 +346,9 @@ function tags_editpost()
 EOT;
 }
 
+
+$plugins->add_hook("editpost_do_editpost_end", "tags_editpost_done");
+
 function tags_editpost_done()
 {
 	global $mybb, $db, $tid, $thread, $post;
@@ -378,7 +372,6 @@ function tags_editpost_done()
 	$tags_insert = array();
 	foreach($tags as $tag)
 	{
-		$tags_hash_arr[] = md5(my_strtolower($tag));
 		array_push($tags_insert, array(
 			'tid' => $tid,
 			'name' => $tag,
@@ -386,35 +379,33 @@ function tags_editpost_done()
 		));
 	}
 
-	$tags_hash = implode(',', $tags_hash_arr);
 
 	$db->delete_query("tags", "tid='{$tid}'");
 	$db->insert_query_multiple("tags", $tags_insert);
-	$db->update_query("threads", array(
-		"tags" => ','.$tags_value.',',
-		"tags_hash" => ','.$tags_hash.','
-	), "tid='{$tid}'", 1);
 }
+
+$plugins->add_hook("showthread_start", "tags_showthread");
 
 function tags_showthread()
 {
 	global $mybb, $db, $theme, $thread, $tags;
 	$subject = $thread['subject'];
 	$tid = $thread['tid'];
+	$thread['tags'] = array();
 
-	$thread['tags'] = trim(ltrim(rtrim($thread['tags'],','),','),',');
-	if($thread['tags'] == '')
+	$query = $db->simple_select('tags', '*', "tid='{$tid}'");
+	while($tag = $db->fetch_array($query))
 	{
-		$subject = str_replace(array(" ", "-", "_"), ',', $subject);
-		$subject = ltrim(rtrim(trim($subject)));
-		$subject = ltrim(rtrim(trim($subject, ','), ','), ',');
+		array_push($thread['tags'], $tag['name']);
+	}
+	if($db->num_rows($query) == 0)
+	{
+		$subject = tags_string2tag($subject);
 		$tags = explode(',', $subject);
-		$tags_hash_arr = array();
 
 		$tags_insert = array();
 		foreach($tags as $tag)
 		{
-			$tags_hash_arr[] = md5(my_strtolower($tag));
 			array_push($tags_insert, array(
 				'tid' => $tid,
 				'name' => $tag,
@@ -422,20 +413,13 @@ function tags_showthread()
 			));
 		}
 
-		$tags_hash = implode(',', $tags_hash_arr);
-
 		$db->delete_query("tags", "tid={$tid}");
 		$db->insert_query_multiple("tags", $tags_insert);
-		$db->update_query("threads", array(
-			"tags" => ','.$subject.',',
-			"tags_hash" => ','.$tags_hash.','
-		), "tid='{$tid}'", 1);
-		$thread['tags'] = ','.$subject.',';
-		$thread['tags_hash'] = ','.$tags_hash.',';
+		$thread['tags'] = $tags;
 	}
 
+
 	$tags = '';
-	$thread['tags'] = explode(',', $thread['tags']);
 	$comma = '';
 	$i = 0;
 	foreach($thread['tags'] as $tag)
