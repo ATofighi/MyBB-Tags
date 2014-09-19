@@ -14,8 +14,8 @@ if(!defined("IN_MYBB"))
 	die("This file cannot be accessed directly.");
 }
 	
-/*
-if(defined('THIS_SCRIPT') && THIS_SCRIPT== 'index.php')
+
+if(defined('THIS_SCRIPT') && in_array(THIS_SCRIPT, array('tag.php', 'showthread.php', 'index.php', 'forumdisplay.php')))
 {
     global $templatelist;
     if(isset($templatelist) && $templatelist != '')
@@ -27,9 +27,9 @@ if(defined('THIS_SCRIPT') && THIS_SCRIPT== 'index.php')
 		$templatelist = '';
 	}
 
-    $templatelist .= 'hello_index';
+    $templatelist .= 'tags_input,tags_box,tags_box_tag,tags_box_tag_sized,tags_search,tags_thread,tags_notags,tags_viewtag';
 }
-*/
+
 
 function tags_info()
 {
@@ -79,41 +79,167 @@ function tags_install()
 {
 	global $db, $lang, $mybb;
 	
-/*	$templatearray = array(
-		"tid" => "NULL",
-		"title" => 'tags_index',
-		"template" => $db->escape_string('
-<br />
-<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-<thead>
+	$templatearray = array(
+		array(
+			"title" => 'tags_input',
+			"template" => $db->escape_string('<tr>
+	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
+	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
+</tr>
+<script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.js"></script>
+<link rel="stylesheet" type="text/css" href="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.css" />
+<script type="text/javascript">
+	$("#tags").tagsInput({
+		\'height\': \'40px\',
+		\'width\': \'auto\',
+		\'defaultText\': \'{$lang->tags_placeholder}\'
+	});
+
+	$("#tags").on(\'change\', function()
+	{
+		$(this).importTags($(this).val());
+	});
+</script>'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_box',
+			"template" => $db->escape_string('<br class="clear" />
+<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder tfixed clear">
+	<thead>
 	<tr>
 		<td class="thead">
-			<strong>{$lang->hello}</strong>
+			<div class="expcolimage"><img src="{$theme[\'imgdir\']}/collapse{$collapsedimg[\'tags\']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
+			<strong>{$lang->tags}</strong>
 		</td>
 	</tr>
-</thead>
-<tbody>
-	<tr>
-		<td class="tcat">
-			<form method="POST" action="misc.php">
-				<input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
-				<input type="hidden" name="action" value="hello" />
-				{$lang->hello_add_message}: <input type="text" name="message" class="textbox" /> <input type="submit" name="submit" value="{$lang->hello_add}" />
-			</form>
-		</td>
-	</tr>
+	</thead>
+	<tbody style="{$collapsed[\'tags_e\']}" id="tags_e">
 	<tr>
 		<td class="trow1">
-		{$messages}
+			{$tags}
 		</td>
 	</tr>
-</tbody>
+	</tbody>
 </table>
-<br />'),
-		"sid" => "-1",
+<br class="clear" />
+'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_box_tag',
+			"template" => $db->escape_string('
+{$comma}<a href="{$mybb->settings[\'bburl\']}/{$tag_link}" title="{$tag}">{$tag}</a>
+'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_box_tag_sized',
+			"template" => $db->escape_string('{$comma}<a href="{$tag[\'tag_link\']}" style="font-size:{$tag[\'size\']}px">{$tag[\'name\']}</a>'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_search',
+			"template" => $db->escape_string('	<html>
+		<head>
+			<title>{$mybb->settings[\'bbname\']} - Tags</title>
+			{$headerinclude}
+		</head>
+		<body>
+			{$header}
+			<form action="{$tag_link}" method="get">
+			<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder clear">
+				<tr>
+					<td class="thead" colspan="2">
+						<strong>{$lang->tags_search}</strong>
+					</td>
+				</tr>
+				<tr>
+					<td class="trow2">
+						<input type="text" class="textbox" placeholder="{$lang->tags_search_placeholder}" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" />
+					</td>
+					<td class="trow2" width="50">
+						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$lang->tags_go}" />
+					</td>
+				</tr>
+			</table>
+			</form>
+			{$footer}
+		</body>
+	</html>
+'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_thread',
+			"template" => $db->escape_string('
+	<tr>
+		<td class="tcat" colspan="2">
+			<div class="float_{$no_dir}">
+				{$lang->tags_author}: <strong>{$tag[\'profilelink\']}</strong> - {$lang->tags_replies}: <a href="javascript:MyBB.whoPosted({$tag[\'tid\']});">{$tag[\'replies\']}</a> - {$lang->tags_views}: {$tag[\'views\']}
+			</div>
+			<a href="{$tag[\'threadlink\']}{$highlight}"><strong>{$tag[\'subject\']}</strong></a>
+		</td>
+	</tr>
+	<tr>
+		<td class="trow1" colspan="2">
+			<div style="max-height:100px;overflow:auto">
+				{$tag[\'message\']}
+			</div>
+		</td>
+	</tr>
+'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_notags',
+			"template" => $db->escape_string('
+<tr>
+	<td class="trow1" colspan="2">
+		{$lang->tags_notags}
+	</td>
+</tr>
+'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_viewtag',
+			"template" => $db->escape_string('
+	<html>
+		<head>
+			<title>{$lang->tags} - {$name}</title>
+			{$headerinclude}
+		</head>
+		<body>
+			{$header}
+			<form action="{$tag_link}" method="get">
+			<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder clear">
+				<tr>
+					<td class="thead" colspan="2">
+						<strong>{$lang->tags}</strong>
+					</td>
+				</tr>
+				<tr>
+					<td class="trow2">
+						<input type="text" class="textbox" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$name}" />
+					</td>
+					<td class="trow2" width="50">
+						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$lang->tags_go}" />
+					</td>
+				</tr>
+				{$tags}
+			</table>
+			</form>
+			{$multipage}
+			{$footer}
+		</body>
+	</html>
+'),
+			"sid" => "-1"
+		)
 	);
 
-	$db->insert_query("templates", $templatearray);*/
+	$db->insert_query_multiple("templates", $templatearray);
 
 	// create settings group
 	$insertarray = array(
@@ -140,7 +266,7 @@ function tags_install()
 		array(
 			"name"			=> "tags_seo",
 			"title"			=> "SEO Friendly URL",
-			"description"	=> $db->escape_string('Do you want to use Seo URLs tags-***.html for tags?<br />
+			"description"	=> $db->escape_string('Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
 You must add these codes to ".htaccess" file before set it to "On":
 <pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
 RewriteEngine <strong>on</strong>
@@ -225,7 +351,7 @@ function tags_uninstall()
 {
 	global $db, $mybb;
 	
-	//$db->delete_query('templates', "title LIKE 'tags' AND sid='-1'");
+	$db->delete_query('templates', "title LIKE 'tags\_%' AND sid='-1'");
 
 	$db->delete_query("settinggroups", "name = 'tags'");
 	
@@ -301,7 +427,7 @@ $plugins->add_hook("newthread_start", "tags_newthread");
 
 function tags_newthread()
 {
-	global $mybb, $db, $tags, $tags_value, $lang;
+	global $mybb, $db, $templates, $tags, $tags_value, $lang;
 
 	if($mybb->settings['tags_enabled'] == 0)
 	{
@@ -313,26 +439,7 @@ function tags_newthread()
 	$tags_value = $mybb->get_input('tags');
 	$tags_value = htmlspecialchars_uni(tags_string2tag($tags_value));
 
-	$tags = <<<EOT
-<tr>
-	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
-	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
-</tr>
-<script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.js"></script>
-<link rel="stylesheet" type="text/css" href="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.css" />
-<script type="text/javascript">
-	$("#tags").tagsInput({
-		'height': '40px',
-		'width': 'auto',
-		'defaultText': '{$lang->tags_placeholder}'
-	});
-
-	$("#tags").on('change', function()
-	{
-		$(this).importTags($(this).val());
-	});
-</script>
-EOT;
+	eval('$tags = "'.$templates->get('tags_input').'";');
 }
 
 $plugins->add_hook("newthread_do_newthread_end", "tags_newthread_done");
@@ -380,7 +487,7 @@ $plugins->add_hook("editpost_end", "tags_editpost");
 
 function tags_editpost()
 {
-	global $mybb, $db, $lang, $thread, $post, $tags, $tags_value;
+	global $mybb, $db, $lang, $templates, $thread, $post, $tags, $tags_value;
 
 	if($mybb->settings['tags_enabled'] == 0)
 	{
@@ -407,26 +514,7 @@ function tags_editpost()
 	}
 	$tags_value = htmlspecialchars_uni(tags_string2tag($tags_value));
 
-	$tags = <<<EOT
-<tr>
-	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
-	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
-</tr>
-<script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.js"></script>
-<link rel="stylesheet" type="text/css" href="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.css" />
-<script type="text/javascript">
-	$("#tags").tagsInput({
-		'height': '40px',
-		'width': 'auto',
-		'defaultText': '{$lang->tags_placeholder}'
-	});
-
-	$("#tags").on('change', function()
-	{
-		$(this).importTags($(this).val());
-	});
-</script>
-EOT;
+	eval('$tags = "'.$templates->get('tags_input').'";');
 }
 
 
@@ -476,7 +564,7 @@ $plugins->add_hook("showthread_start", "tags_showthread");
 
 function tags_showthread()
 {
-	global $mybb, $db, $theme, $lang, $thread, $tags, $collapsedimg, $collapsed;
+	global $mybb, $db, $theme, $lang, $templates, $thread, $tags, $collapsedimg, $collapsed;
 
 	if($mybb->settings['tags_enabled'] == 0)
 	{
@@ -525,37 +613,14 @@ function tags_showthread()
 
 		$tag = htmlspecialchars_uni($tag);
 		$tag_link = get_tag_link($tag);
-		$tags .= <<<EOT
-{$comma}<a href="{$mybb->settings['bburl']}/{$tag_link}" title="{$tag}">{$tag}</a> 
-EOT;
+		eval('$tags .= "'.$templates->get('tags_box_tag').'";');
 		$comma = ', ';
 		$i++;
 	}
 
 	if($tags != '')
 	{
-	$tags = <<<EOT
-<br class="clear" />
-<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
-	<thead>
-	<tr>
-		<td class="thead">
-			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
-			<strong>{$lang->tags}</strong>
-		</td>
-	</tr>
-	</thead>
-	<tbody style="{$collapsed['tags_e']}" id="tags_e">
-	<tr>
-		<td class="trow1">
-			{$tags}
-		</td>
-	</tr>
-	</tbody>
-</table>
-<br class="clear" />
-		
-EOT;
+	eval('$tags = "'.$templates->get('tags_box').'";');
 	}
 }
 
@@ -564,7 +629,7 @@ $plugins->add_hook("index_start", "tags_index");
 
 function tags_index()
 {
-	global $mybb, $db, $tags, $theme, $lang, $collapsedimg, $collapsed;
+	global $mybb, $db, $tags, $theme, $templates, $lang, $collapsedimg, $collapsed;
 
 	if($mybb->settings['tags_enabled'] == 0 || $mybb->settings['tags_index'] == 0)
 	{
@@ -606,7 +671,7 @@ function tags_index()
 						 GROUP BY tag.hash
 						 ORDER BY RAND()
 						 LIMIT 0, {$mybb->settings['tags_limit']}");
-	$tags = '';
+	$tags = $comma = '';
 
 	while($tag = $db->fetch_array($query))
 	{
@@ -648,41 +713,20 @@ function tags_index()
 		{
 			$tag['size'] = '8';
 		}
-		$tags .= <<<EOT
-<a href="{$tag['tag_link']}" style="font-size:{$tag['size']}px">{$tag['name']}</a> 
-EOT;
+		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
+		$comma = ', ';
 	}
 
 	if($tags != '')
 	{
-	$tags = <<<EOT
-<br class="clear" />
-<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
-	<thead>
-	<tr>
-		<td class="thead">
-			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
-			<strong>{$lang->tags}</strong>
-		</td>
-	</tr>
-	<thead>
-	<tbody style="{$collapsed['tags_e']}" id="tags_e">
-	<tr>
-		<td class="trow1">
-			{$tags}
-	</tr>
-	</tbody>
-</table>
-		</td>
-<br class="clear" />
-EOT;
+	eval('$tags = "'.$templates->get('tags_box').'";');
 	}
 }
 $plugins->add_hook("forumdisplay_end", "tags_forumdisplay");
 
 function tags_forumdisplay()
 {
-	global $mybb, $db, $lang, $tags, $theme, $collapsedimg, $collapsed, $fid;
+	global $mybb, $db, $lang, $templates, $tags, $theme, $collapsedimg, $collapsed, $fid;
 
 	if($mybb->settings['tags_enabled'] == 0 || $mybb->settings['tags_forumdisplay'] == 0)
 	{
@@ -766,33 +810,19 @@ function tags_forumdisplay()
 		{
 			$tag['size'] = '8';
 		}
-		$tags .= <<<EOT
-<a href="{$tag['tag_link']}" style="font-size:{$tag['size']}px">{$tag['name']}</a> 
-EOT;
+		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
 	}
 
 	if($tags != '')
 	{
-	$tags = <<<EOT
-<br class="clear" />
-<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder tfixed clear">
-	<thead>
-	<tr>
-		<td class="thead">
-			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
-			<strong>{$lang->tags}</strong>
-		</td>
-	</tr>
-	<thead>
-	<tbody style="{$collapsed['tags_e']}" id="tags_e">
-	<tr>
-		<td class="trow1">
-			{$tags}
-	</tr>
-	</tbody>
-</table>
-		</td>
-<br class="clear" />
-EOT;
+		eval('$tags = "'.$templates->get('tags_box').'";');
 	}
+}
+
+$plugins->add_hook("admin_config_settings_begin", "tags_settings");
+
+function tags_settings()
+{
+	global $lang;
+	$lang->load('tags');
 }

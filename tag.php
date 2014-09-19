@@ -95,35 +95,7 @@ if($name && $mybb->settings['tags_seo'] && tags_current_url() != $mybb->settings
 if(!$name)
 {
 
-	$tag = <<<EOT
-	<html>
-		<head>
-			<title>{$mybb->settings['bbname']} - Tags</title>
-			{$headerinclude}
-		</head>
-		<body>
-			{$header}
-			<form action="{$tag_link}" method="get">
-			<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder clear">
-				<tr>
-					<td class="thead" colspan="2">
-						<strong>{$lang->tags_search}</strong>
-					</td>
-				</tr>
-				<tr>
-					<td class="trow2">
-						<input type="text" class="textbox" placeholder="{$lang->tags_search_placeholder}" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" />
-					</td>
-					<td class="trow2" width="50">
-						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$lang->tags_go}" />
-					</td>
-				</tr>
-			</table>
-			</form>
-			{$footer}
-		</body>
-	</html>
-EOT;
+	eval('$tag = "'.$templates->get('tags_search').'";');
 	output_page($tag);
 }
 else
@@ -184,66 +156,14 @@ else
 		$tag['subject'] = htmlspecialchars_uni($parser->parse_badwords($tag['subject']));
 		$tag['threadlink'] = get_thread_link($tag['tid']);
 		$tag['profilelink'] = build_profile_link($tag['username'], $tag['uid']);
-		$tags .= <<<EOT
-	<tr>
-		<td class="tcat" colspan="2">
-			<div class="float_{$no_dir}">
-				{$lang->tags_author}: <strong>{$tag['profilelink']}</strong> - {$lang->tags_replies}: <a href="javascript:MyBB.whoPosted({$tag['tid']});">{$tag['replies']}</a> - {$lang->tags_views}: {$tag['views']}
-			</div>
-			<a href="{$tag['threadlink']}{$highlight}"><strong>{$tag['subject']}</strong></a>
-		</td>
-	</tr>
-	<tr>
-		<td class="trow1" colspan="2">
-			<div style="max-height:100px;overflow:auto">
-				{$tag['message']}
-			</div>
-		</td>
-	</tr>
-EOT;
+		eval('$tags .= "'.$templates->get('tags_thread').'";');
 	}
 
 	if($tags == '')
 	{
-		$tags = <<<EOT
-<tr>
-	<td class="trow1" colspan="2">
-		{$lang->tags_notags}
-	</td>
-</tr>
-EOT;
+		eval('$tags = "'.$templates->get('tags_notags').'";');
 	}
 
-	$tag = <<<EOT
-	<html>
-		<head>
-			<title>{$lang->tags} - {$name}</title>
-			{$headerinclude}
-		</head>
-		<body>
-			{$header}
-			<form action="{$tag_link}" method="get">
-			<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder clear">
-				<tr>
-					<td class="thead" colspan="2">
-						<strong>{$lang->tags}</strong>
-					</td>
-				</tr>
-				<tr>
-					<td class="trow2">
-						<input type="text" class="textbox" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$name}" />
-					</td>
-					<td class="trow2" width="50">
-						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$lang->tags_go}" />
-					</td>
-				</tr>
-				{$tags}
-			</table>
-			</form>
-			{$multipage}
-			{$footer}
-		</body>
-	</html>
-EOT;
+	eval('$tag = "'.$templates->get('tags_viewtag').'";');
 	output_page($tag);
 }
