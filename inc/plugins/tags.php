@@ -34,9 +34,9 @@ if(defined('THIS_SCRIPT') && THIS_SCRIPT== 'index.php')
 function tags_info()
 {
 	global $lang;
-	//$lang->load('tags');
+	$lang->load('tags');
 	return array(
-		"name"			=> 'Tags',
+		"name"			=> $lang->tags_pluginname,
 		"description"	=> '',
 		"website"		=> "http://myb-b.ir",
 		"author"		=> "My-BB.Ir Group",
@@ -242,14 +242,16 @@ $plugins->add_hook("newthread_start", "tags_newthread");
 
 function tags_newthread()
 {
-	global $mybb, $db, $tags, $tags_value;
+	global $mybb, $db, $tags, $tags_value, $lang;
+
+	$lang->load('tags');
 
 	$tags_value = $mybb->get_input('tags');
 	$tags_value = htmlspecialchars_uni(tags_string2tag($tags_value));
 
 	$tags = <<<EOT
 <tr>
-	<td class="trow2" width="20%" valign="top"><strong>Tags:</strong></td>
+	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
 	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
 </tr>
 <script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.js"></script>
@@ -258,7 +260,7 @@ function tags_newthread()
 	$("#tags").tagsInput({
 		'height': '40px',
 		'width': 'auto',
-		'defaultText': 'Add tags here'
+		'defaultText': '{$lang->tags_placeholder}'
 	});
 
 	$("#tags").on('change', function()
@@ -309,7 +311,8 @@ $plugins->add_hook("editpost_end", "tags_editpost");
 
 function tags_editpost()
 {
-	global $mybb, $db, $thread, $post, $tags, $tags_value;
+	global $mybb, $db, $lang, $thread, $post, $tags, $tags_value;
+	$lang->load('tags');
 
 	if($thread['firstpost'] != $post['pid'])
 	{
@@ -331,7 +334,7 @@ function tags_editpost()
 
 	$tags = <<<EOT
 <tr>
-	<td class="trow2" width="20%" valign="top"><strong>Tags:</strong></td>
+	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
 	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
 </tr>
 <script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.js"></script>
@@ -340,7 +343,7 @@ function tags_editpost()
 	$("#tags").tagsInput({
 		'height': '40px',
 		'width': 'auto',
-		'defaultText': 'Add tags here'
+		'defaultText': '{$lang->tags_placeholder}'
 	});
 
 	$("#tags").on('change', function()
@@ -393,7 +396,9 @@ $plugins->add_hook("showthread_start", "tags_showthread");
 
 function tags_showthread()
 {
-	global $mybb, $db, $theme, $thread, $tags, $collapsedimg, $collapsed;
+	global $mybb, $db, $theme, $lang, $thread, $tags, $collapsedimg, $collapsed;
+	$lang->load('tags');
+
 	$subject = $thread['subject'];
 	$tid = $thread['tid'];
 	$thread['tags'] = array();
@@ -448,7 +453,7 @@ EOT;
 	<tr>
 		<td class="thead">
 			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
-			<strong>Tags</strong>
+			<strong>{$lang->tags}</strong>
 		</td>
 	</tr>
 	</thead>
@@ -470,7 +475,8 @@ $plugins->add_hook("index_start", "tags_index");
 
 function tags_index()
 {
-	global $mybb, $db, $tags, $theme, $collapsedimg, $collapsed;
+	global $mybb, $db, $tags, $theme, $lang, $collapsedimg, $collapsed;
+	$lang->load('tags');
 
 	// get forums user cannot view
 	$unviewable = get_unviewable_forums(true);
@@ -557,7 +563,7 @@ EOT;
 	<tr>
 		<td class="thead">
 			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
-			<strong>Tags</strong>
+			<strong>{$lang->tags}</strong>
 		</td>
 	</tr>
 	<thead>
@@ -576,7 +582,8 @@ $plugins->add_hook("forumdisplay_end", "tags_forumdisplay");
 
 function tags_forumdisplay()
 {
-	global $mybb, $db, $tags, $theme, $collapsedimg, $collapsed, $fid;
+	global $mybb, $db, $lang, $tags, $theme, $collapsedimg, $collapsed, $fid;
+	$lang->load('tags');
 
 	// get forums user cannot view
 	$unviewable = get_unviewable_forums(true);
@@ -665,7 +672,7 @@ EOT;
 	<tr>
 		<td class="thead">
 			<div class="expcolimage"><img src="{$theme['imgdir']}/collapse{$collapsedimg['tags']}.png" id="tags_img" class="expander" alt="[-]" title="[-]" /></div>
-			<strong>Tags</strong>
+			<strong>{$lang->tags}</strong>
 		</td>
 	</tr>
 	<thead>

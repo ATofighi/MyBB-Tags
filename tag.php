@@ -27,6 +27,8 @@ $parser_options['allow_videocode'] = 0;
 $parser_options['me_username'] = 0;
 $parser_options['filter_badwords'] = 1;
 
+$lang->load('tags');
+
 $dir = 'left';
 $no_dir = 'right';
 if($lang->settings['rtl'])
@@ -64,7 +66,7 @@ $name = $parser->parse_badwords($name);
 $name = tags_string2tag($name);
 $name = htmlspecialchars_uni($name);
 $hash = md5($name);
-add_breadcrumb('Tags', get_tag_link());
+add_breadcrumb($lang->tags, get_tag_link());
 
 $tag_link = get_tag_link();
 
@@ -83,15 +85,15 @@ if(!$name)
 			<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder clear">
 				<tr>
 					<td class="thead" colspan="2">
-						<strong>Search</strong>
+						<strong>{$lang->tags_search}</strong>
 					</td>
 				</tr>
 				<tr>
 					<td class="trow2">
-						<input type="text" class="textbox" placeholder="Please enter a tag..." name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" />
+						<input type="text" class="textbox" placeholder="{$lang->tags_search_placeholder}" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" />
 					</td>
 					<td class="trow2" width="50">
-						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="Go" />
+						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$lang->tags_go}" />
 					</td>
 				</tr>
 			</table>
@@ -165,7 +167,7 @@ else
 	<tr>
 		<td class="tcat" colspan="2">
 			<div class="float_{$no_dir}">
-				By: <strong>{$tag['profilelink']}</strong> - Replies: <a href="javascript:MyBB.whoPosted({$tag['tid']});">{$tag['replies']}</a> - Views: {$tag['views']}
+				{$lang->tags_author}: <strong>{$tag['profilelink']}</strong> - {$lang->tags_replies}: <a href="javascript:MyBB.whoPosted({$tag['tid']});">{$tag['replies']}</a> - {$lang->tags_views}: {$tag['views']}
 			</div>
 			<a href="{$tag['threadlink']}{$highlight}"><strong>{$tag['subject']}</strong></a>
 		</td>
@@ -185,7 +187,7 @@ EOT;
 		$tags = <<<EOT
 <tr>
 	<td class="trow1" colspan="2">
-		We can't find anything for this Tag
+		{$lang->tags_notags}
 	</td>
 </tr>
 EOT;
@@ -194,7 +196,7 @@ EOT;
 	$tag = <<<EOT
 	<html>
 		<head>
-			<title>Tags - {$name}</title>
+			<title>{$lang->tags} - {$name}</title>
 			{$headerinclude}
 		</head>
 		<body>
@@ -203,7 +205,7 @@ EOT;
 			<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder clear">
 				<tr>
 					<td class="thead" colspan="2">
-						<strong>Tags</strong>
+						<strong>{$lang->tags}</strong>
 					</td>
 				</tr>
 				<tr>
@@ -211,7 +213,7 @@ EOT;
 						<input type="text" class="textbox" name="name" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$name}" />
 					</td>
 					<td class="trow2" width="50">
-						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="Go" />
+						<input type="submit" class="button" style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:16px;" value="{$lang->tags_go}" />
 					</td>
 				</tr>
 				{$tags}
