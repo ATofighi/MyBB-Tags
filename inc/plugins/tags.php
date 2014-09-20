@@ -86,7 +86,7 @@ function tags_install()
 	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
 	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
 </tr>
-<script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.js"></script>
+<script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.css" />
 <script type="text/javascript">
 	$("#tags").tagsInput({
