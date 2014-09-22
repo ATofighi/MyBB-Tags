@@ -1,6 +1,6 @@
 <?php
 /**
- * MyBB-Tags 1.8 Pacote de Língua Brasileira
+ * MyBB-Tags 2 Pacote de Língua Brasileira
  * Direitos Autorais 2014 My-BB.Ir Group, Todos os DIreitos Reservados
  * Traduzido por ArnoldLayne-xXx dthiago http://bf4brasil.com.br/
  * Author: AliReza_Tofighi - http://my-bb.ir
@@ -25,9 +25,10 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 $l['setting_tags_per_page'] = "Etiquetas por páginas";
 $l['setting_tags_per_page_desc'] = 'Quantas etiquetas devem ser mostradas por páginas de "Etiquetas"?';
 $l['setting_tags_limit'] = 'Limitar etiquetas na  "Index Page" e "Forum Display Page"';
-$l['setting_tags_limit_desc'] = 'Quantas etiquetas devem ser mostradas na "Index Page" e "Forum Display Page" ?';
+$l['setting_tags_limit_desc'] = 'Quantas etiquetas devem ser mostradas na "Index Page" e "Forum Display Page"?';
 $l['setting_tags_index'] = 'Mostrar etiquetas na página principal?';
 $l['setting_tags_index_desc'] = 'Você deseja mostrar etiquetas na página principal?';
 $l['setting_tags_forumdisplay'] = 'Mostrar etiquetas em "Forum Display" ?';
-$l['setting_tags_forumdisplay_desc'] = 'Você deseja mostrar etiquetas na página  "Forum Display" ?';
-
+$l['setting_tags_forumdisplay_desc'] = 'Você deseja mostrar etiquetas na página  "Forum Display"?';
+$l['setting_tags_max_thread'] = 'Maximun tags for a thread';//English
+$l['setting_tags_max_thread_desc'] = 'Please enter the maximum number of tags for threads. Set it to 0 for unlimited.';//English

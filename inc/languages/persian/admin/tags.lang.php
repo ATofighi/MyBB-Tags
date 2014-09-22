@@ -1,6 +1,6 @@
 <?php
 /**
- * MyBB-Tags 1.8 Persian Language Pack
+ * MyBB-Tags 2 Persian Language Pack
  * Copyright 2014 My-BB.Ir Group, All Rights Reserved
  * 
  * Author: AliReza_Tofighi - http://my-bb.ir
@@ -32,4 +32,5 @@ $l['setting_tags_index'] = 'نمایش کلمات کلیدی در صفحه‌ی 
 $l['setting_tags_index_desc'] = 'آیا شما می‌خواهید که کلمات کلیدی در صفحه‌ی نخست نمایش داده شوند؟';
 $l['setting_tags_forumdisplay'] = 'نمایش کلمات کلیدی در صفحه‌ی نمایش انجمن';
 $l['setting_tags_forumdisplay_desc'] = 'آیا شما می‌خواهید که کلمات کلیدی در صفحه‌ی نمایش انجمن نمایش داده شوند؟';
-
+$l['setting_tags_max_thread'] = 'حداکثر کلمه‌ی کلیدی برای یک موضوع';
+$l['setting_tags_max_thread_desc'] = 'لطفا تعداد حداکثر کلمه‌ی کلیدی‌ای که هرفرد بتواند برای موضوعات وارد کند را وارد فرمائید. برای ایجاد نکردن محدودیت بر روی 0 قرار دهید.';

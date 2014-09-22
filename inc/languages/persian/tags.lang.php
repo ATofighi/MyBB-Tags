@@ -1,6 +1,6 @@
 <?php
 /**
- * MyBB-Tags 1.8 Persian Language Pack
+ * MyBB-Tags 2 Persian Language Pack
  * Copyright 2014 My-BB.Ir Group, All Rights Reserved
  * 
  * Author: AliReza_Tofighi - http://my-bb.ir
@@ -18,3 +18,4 @@ $l['tags_replies'] = "پاسخ‌ها";
 $l['tags_views'] = "بازدید‌ها";
 $l['tags_notags'] = "متاسفیم، ولی نتیجه‌ای برای جستجو‌ی انجام شده وجود ندارد. لطفا کلمه‌ی کلیدی خودرا دوباره وارد کرده و جستجو فرمائید.";
 $l['tags_disabled'] = 'متاسفیم، ولی کلمات کلیدی غیرفعال هستند.';
+$l['many_tags'] = 'شما تعداد بسیار زیادی کلمه‌ی کلیدی برای این موضوع وارد کرده‌اید، شما تنها می‌توانید   {1} کلمه‌ی کلیدی وارد فرمائید..';

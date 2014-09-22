@@ -313,6 +313,15 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"value"			=> 1,
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_max_thread",
+			"title"			=> $db->escape_string('Maximun tags for a thread'),
+			"description"	=> $db->escape_string('Please enter the maximum number of tags for threads. Set it to 0 for unlimited.'),
+			"optionscode"	=> "text",
+			"value"			=> 20,
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
 		)
 	);
 	$db->insert_query_multiple("settings", $settings);
@@ -451,47 +460,6 @@ function tags_newthread()
 	eval('$tags = "'.$templates->get('tags_input').'";');
 }
 
-$plugins->add_hook("newthread_do_newthread_end", "tags_newthread_done");
-
-function tags_newthread_done()
-{
-	global $mybb, $db, $tid;
-
-	if($mybb->settings['tags_enabled'] == 0)
-	{
-		return;
-	}
-
-	$tags_value = $mybb->get_input('tags');
-	$tags_value = tags_string2tag($tags_value);
-	$tags = explode(',', $tags_value);
-	$subject = $mybb->get_input('subject');
-	$subject = tags_string2tag($subject);
-	$subject = explode(',', $subject);
-
-	$tags = $tags + $subject;
-	$tags_value = implode(',', $tags);
-
-	$tags_insert = array();
-	foreach($tags as $tag)
-	{
-		if($tag != '')
-		{
-			$tags_hash_arr[] = md5(my_strtolower($tag));
-			array_push($tags_insert, array(
-				'tid' => $tid,
-				'name' => $tag,
-				'hash' => md5(my_strtolower($tag))
-			));
-		}
-	}
-
-	$tags_hash = implode(',', $tags_hash_arr);
-
-	$db->insert_query_multiple("tags", $tags_insert);
-}
-
-
 $plugins->add_hook("editpost_end", "tags_editpost");
 
 function tags_editpost()
@@ -505,7 +473,7 @@ function tags_editpost()
 
 	$lang->load('tags');
 
-	if($thread['firstpost'] != $post['pid'])
+	if($thread['firstpost'] != $mybb->get_input('pid', 1))
 	{
 		return;
 	}
@@ -527,32 +495,30 @@ function tags_editpost()
 }
 
 
-$plugins->add_hook("editpost_do_editpost_end", "tags_editpost_done");
+$plugins->add_hook("datahandler_post_insert_thread_end", "tags_thread");
+$plugins->add_hook("datahandler_post_update_end", "tags_thread");
 
-function tags_editpost_done()
+function tags_thread(&$datahandler)
 {
-	global $mybb, $db, $tid, $thread, $post;
+	global $mybb, $db;
 
 	if($mybb->settings['tags_enabled'] == 0)
 	{
 		return;
 	}
-
-	if($thread['firstpost'] != $post['pid'])
-	{
-		return;
-	}
+	
+	$thread = $datahandler->data;
+	$tid = $datahandler->tid;
 
 	$tags_value = $mybb->get_input('tags');
 	$tags_value = tags_string2tag($tags_value);
 	$tags_hash_arr = array();
 	$tags = explode(',', $tags_value);
-	$subject = $mybb->get_input('subject');
+	$subject = $thread['subject'];
 	$subject = tags_string2tag($subject);
 	$subject = explode(',', $subject);
 
-	$tags = $tags + $subject;
-	$tags_value = implode(',', $tags);
+	$tags = array_merge($tags, $subject);
 
 	$tags_insert = array();
 	foreach($tags as $tag)
@@ -560,13 +526,35 @@ function tags_editpost_done()
 		array_push($tags_insert, array(
 			'tid' => $tid,
 			'name' => $tag,
-			'hash' => md5(my_strtolower($tag))
+			'hash' => md5($tag)
 		));
 	}
 
 
 	$db->delete_query("tags", "tid='{$tid}'");
 	$db->insert_query_multiple("tags", $tags_insert);
+}
+
+$plugins->add_hook("datahandler_post_validate_thread", "tags_validate");
+$plugins->add_hook("datahandler_post_validate_post", "tags_validate");
+
+function tags_validate(&$datahandler)
+{
+	global $mybb, $db, $thread, $lang;
+	$lang->load('tags');
+	$mybb->settings['tags_max_thread'] = (int)$mybb->settings['tags_max_thread'];
+
+	if($mybb->get_input('tags') != '' && ($datahandler->action == 'thread' || (is_array($thread) && $datahandler->data['pid'] == $thread['firstpost'])))
+	{
+		$tags_value = $mybb->get_input('tags');
+		$tags_value = tags_string2tag($tags_value);
+		$tags = explode(',', $tags_value);
+		if(count($tags) > $mybb->settings['tags_max_thread'] && $mybb->settings['tags_max_thread'] > 0)
+		{
+			$lang->many_tags = $lang->sprintf($lang->many_tags, $mybb->settings['tags_max_thread']);
+			$datahandler->set_error($lang->many_tags);
+		}
+	}
 }
 
 $plugins->add_hook("showthread_start", "tags_showthread");

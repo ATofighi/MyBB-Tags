@@ -1,6 +1,6 @@
 <?php
 /**
- * MyBB-Tags 1.8 English Language Pack
+ * MyBB-Tags 2 English Language Pack
  * Copyright 2014 My-BB.Ir Group, All Rights Reserved
  * 
  * Author: AliReza_Tofighi - http://my-bb.ir
@@ -32,4 +32,5 @@ $l['setting_tags_index'] = 'Show tags in Index Page?';
 $l['setting_tags_index_desc'] = 'Do you want tags shown in Index Page?';
 $l['setting_tags_forumdisplay'] = 'Show tags in "Forum Display" Page?';
 $l['setting_tags_forumdisplay_desc'] = 'Do you want tags shown in "Forum Display" Page?';
-
+$l['setting_tags_max_thread'] = 'Maximun tags for a thread';
+$l['setting_tags_max_thread_desc'] = 'Please enter the maximum number of tags for threads. Set it to 0 for unlimited.';
