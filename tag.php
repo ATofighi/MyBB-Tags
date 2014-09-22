@@ -74,7 +74,16 @@ $name = $mybb->get_input('name');
 $name = $parser->parse_badwords($name);
 $name = tags_string2tag($name);
 $name = htmlspecialchars_uni($name);
-$hash = md5($name);
+$url_name = urlencode(str_replace(',', '-', $name));
+$names = explode(',', $name);
+$hash = array();
+foreach($names as $n)
+{
+	array_push($hash, "'".md5($n)."'");
+}
+
+$hash = implode(', ', $hash);
+
 $mybb->settings['tags_per_page'] = (int)($mybb->settings['tags_per_page']);
 if($mybb->settings['tags_per_page'] <= 0 || $mybb->settings['tags_per_page'] >= 100)
 {
@@ -86,13 +95,13 @@ add_breadcrumb($lang->tags, get_tag_link());
 $tag_link = get_tag_link();
 
 
-if($name && $mybb->settings['tags_seo'] && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($name) && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($name)."?page={$page}" && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($name)."&page={$page}")
+if($name && $mybb->settings['tags_seo'] && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name) && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name)."?page={$page}")
 {
-	header("location: ".get_tag_link($name));
+	header("location: ".get_tag_link($url_name));
 	exit;
 }
 
-if(!$name)
+if(!$name || !$hash)
 {
 
 	eval('$tag = "'.$templates->get('tags_search').'";');
@@ -104,7 +113,7 @@ else
 
 	$query = $db->query("SELECT COUNT(thread.tid) as numrows from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
-						 WHERE tag.hash = '{$hash}' And thread.tid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 WHERE tag.hash IN ({$hash}) And thread.tid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 limit 1");
 	$nums = $db->fetch_array($query);
 	$count = $nums['numrows'];
@@ -131,7 +140,7 @@ else
 	$query = $db->query("SELECT thread.tid, post.message, post.username, post.uid, thread.subject, thread.views, thread.replies from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
-						 WHERE tag.hash = '{$hash}' And thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 WHERE tag.hash IN ({$hash}) And thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY thread.tid
 						LIMIT {$start}, {$mybb->settings['tags_per_page']}");
 
