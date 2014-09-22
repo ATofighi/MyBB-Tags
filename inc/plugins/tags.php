@@ -323,14 +323,26 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 	// Create our entries table
 	$collation = $db->build_create_table_collation();
 	
-	if(!$db->table_exists("tags"))
-    {
+	$db->drop_table('tags');
+
+	if($db->type == 'pgsql')
+	{
 		$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
-		  `id` int(10) UNSIGNED NOT NULL auto_increment,
-		  `tid` int(100) UNSIGNED NOT NULL default '0',
-		  `name` varchar(200)  NOT NULL default '',
-		  `hash` varchar(200)  NOT NULL default '',
-		  PRIMARY KEY  (`id`)
+				`id` serial,
+				`tid` int NOT NULL default '0',
+				`name` varchar(200)  NOT NULL default '',
+				`hash` varchar(200)  NOT NULL default '',
+				PRIMARY KEY  (`id`)
+			) ENGINE=MyISAM{$collation}");
+	}
+	else
+	{
+		$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
+				`id` int(10) UNSIGNED NOT NULL auto_increment,
+				`tid` int(100) UNSIGNED NOT NULL default '0',
+				`name` varchar(200)  NOT NULL default '',
+				`hash` varchar(200)  NOT NULL default '',
+				PRIMARY KEY  (`id`)
 			) ENGINE=MyISAM{$collation}");
 	}
 }
@@ -359,10 +371,7 @@ function tags_uninstall()
 	
 	rebuild_settings();
 	
-	if($db->table_exists('tags'))
-	{
-		$db->drop_table('tags');
-	}
+	$db->drop_table('tags');
 
 }
 
@@ -614,7 +623,7 @@ function tags_showthread()
 		$tag = htmlspecialchars_uni($tag);
 		$tag_link = get_tag_link($tag);
 		eval('$tags .= "'.$templates->get('tags_box_tag').'";');
-		$comma = ', ';
+		$comma = $lang->comma;
 		$i++;
 	}
 
@@ -664,12 +673,18 @@ function tags_index()
 		$inactivewhere = '';
 	}
 
+	$order_by = 'RAND()';
+	if($db->type == 'pgsql' || $db->type == 'sqlite')
+	{
+		$order_by = 'RANDOM()';
+	}
+
 	$query = $db->query("SELECT SUM(thread.views) as sumviews, tag.name from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
 						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY tag.hash
-						 ORDER BY RAND()
+						 ORDER BY {$order_by}
 						 LIMIT 0, {$mybb->settings['tags_limit']}");
 	$tags = $comma = '';
 
@@ -714,7 +729,7 @@ function tags_index()
 			$tag['size'] = '8';
 		}
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
-		$comma = ', ';
+		$comma = $lang->comma;
 	}
 
 	if($tags != '')
@@ -761,14 +776,20 @@ function tags_forumdisplay()
 		$inactivewhere = '';
 	}
 
+	$order_by = 'RAND()';
+	if($db->type == 'pgsql' || $db->type == 'sqlite')
+	{
+		$order_by = 'RANDOM()';
+	}
+
 	$query = $db->query("SELECT SUM(thread.views) as sumviews, tag.name from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
 						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1' AND thread.fid = '{$fid}' AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY tag.hash
-						 ORDER BY RAND()
+						 ORDER BY {$order_by}
 						 LIMIT 0, {$mybb->settings['tags_limit']}");
-	$tags = '';
+	$tags = $comma = '';
 
 	while($tag = $db->fetch_array($query))
 	{
@@ -811,6 +832,7 @@ function tags_forumdisplay()
 			$tag['size'] = '8';
 		}
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
+		$comma = ', ';
 	}
 
 	if($tags != '')
