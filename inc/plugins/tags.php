@@ -384,6 +384,39 @@ function tags_uninstall()
 
 }
 
+function tags_getsize($v)
+{
+	global $mybb, $db;
+	$query = $db->simple_select('threads', 'MAX(views) as maxviews', "", array("limit" => 1));
+	$maxviews = $db->fetch_field($query, 'maxviews');
+
+	if($v >= $maxviews)
+	{
+		return 48;
+	}
+	if($v >= $maxviews/2)
+	{
+		return 32;
+	}
+	if($v >= $maxviews/4)
+	{
+		return 24;
+	}
+	if($v >= $maxviews/7)
+	{
+		return 16;
+	}
+	if($v >= $maxviews/13)
+	{
+		return 14;
+	}
+	if($v >= $maxviews/20)
+	{
+		return 12;
+	}
+	return 8;
+}
+
 function tags_string2tag($s)
 {
 	$s = my_strtolower($s);
@@ -680,42 +713,7 @@ function tags_index()
 	{
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
 		$tag['tag_link'] = get_tag_link($tag['name']);
-		if($tag['sumviews'] > 5000)
-		{
-			$tag['size'] = '48';
-		}
-		elseif($tag['sumviews'] > 3000)
-		{
-			$tag['size'] = '40';
-		}
-		elseif($tag['sumviews'] > 1000)
-		{
-			$tag['size'] = '32';
-		}
-		elseif($tag['sumviews'] > 500)
-		{
-			$tag['size'] = '24';
-		}
-		elseif($tag['sumviews'] > 250)
-		{
-			$tag['size'] = '18';
-		}
-		elseif($tag['sumviews'] > 100)
-		{
-			$tag['size'] = '16';
-		}
-		elseif($tag['sumviews'] > 50)
-		{
-			$tag['size'] = '14';
-		}
-		elseif($tag['sumviews'] > 10)
-		{
-			$tag['size'] = '12';
-		}
-		else
-		{
-			$tag['size'] = '8';
-		}
+		$tag['size'] = tags_getsize($tag['sumviews']);
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
 		$comma = $lang->comma;
 	}
@@ -783,42 +781,7 @@ function tags_forumdisplay()
 	{
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
 		$tag['tag_link'] = get_tag_link($tag['name']);
-		if($tag['sumviews'] > 5000)
-		{
-			$tag['size'] = '48';
-		}
-		elseif($tag['sumviews'] > 3000)
-		{
-			$tag['size'] = '40';
-		}
-		elseif($tag['sumviews'] > 1000)
-		{
-			$tag['size'] = '32';
-		}
-		elseif($tag['sumviews'] > 500)
-		{
-			$tag['size'] = '24';
-		}
-		elseif($tag['sumviews'] > 250)
-		{
-			$tag['size'] = '18';
-		}
-		elseif($tag['sumviews'] > 100)
-		{
-			$tag['size'] = '16';
-		}
-		elseif($tag['sumviews'] > 50)
-		{
-			$tag['size'] = '14';
-		}
-		elseif($tag['sumviews'] > 10)
-		{
-			$tag['size'] = '12';
-		}
-		else
-		{
-			$tag['size'] = '8';
-		}
+		$tag['size'] = tags_getsize($tag['sumviews']);
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
 		$comma = ', ';
 	}
