@@ -53,6 +53,85 @@ function tags_activate()
 		require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
 	}
 	
+	// add settings
+	$i = 0;
+	$settings = array(
+		array(
+			"name"			=> "tags_enabled",
+			"title"			=> "Enable Plugin",
+			"description"	=> $db->escape_string('Set to "on" if you want Enable this plugin.'),
+			"optionscode"	=> "onoff",
+			"value"			=> tags_setting_value("tags_enabled", 0),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_seo",
+			"title"			=> "SEO Friendly URL",
+			"description"	=> $db->escape_string('Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
+You must add these codes to ".htaccess" file before set it to "On":
+<pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
+RewriteEngine <strong>on</strong>
+RewriteRule <strong>^tag-(.*?)\.html$ tag.php?name=$1</strong> <em>[L,QSA]</em>
+RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
+</pre>'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_seo", 0),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_per_page",
+			"title"			=> "Tags per page",
+			"description"	=> $db->escape_string('How many tags shown in "Tags" page?'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_per_page", 10),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_limit",
+			"title"			=> $db->escape_string('Limit Tags in "Index Page" and "Forum Display Page"'),
+			"description"	=> $db->escape_string('How many tags shown in "Index Page" and "Forum Display Page" ?'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_limit", 50),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_index",
+			"title"			=> $db->escape_string('Show tags in Index Page?'),
+			"description"	=> $db->escape_string('Do you want tags shown in Index Page?'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_index", 1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_forumdisplay",
+			"title"			=> $db->escape_string('Show tags in "Forum Display" Page?'),
+			"description"	=> $db->escape_string('Do you want tags shown in "Forum Display" Page?'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_forumdisplay", 1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_max_thread",
+			"title"			=> $db->escape_string('Maximun tags for a thread'),
+			"description"	=> $db->escape_string('Please enter the maximum number of tags for threads. Set it to 0 for unlimited.'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_max_thread", 20),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		)
+	);
+
+	$db->delete_query('settings', "name LIKE 'tags\_%'");
+	$db->insert_query_multiple("settings", $settings);
+	
+
+	rebuild_settings();
 
 	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
@@ -251,84 +330,6 @@ function tags_install()
 	);
 	$gid = $db->insert_query("settinggroups", $insertarray);
 	
-	// add settings
-	$i = 0;
-	$settings = array(
-		array(
-			"name"			=> "tags_enabled",
-			"title"			=> "Enable Plugin",
-			"description"	=> $db->escape_string('Set to "on" if you want Enable this plugin.'),
-			"optionscode"	=> "onoff",
-			"value"			=> 1,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		),
-		array(
-			"name"			=> "tags_seo",
-			"title"			=> "SEO Friendly URL",
-			"description"	=> $db->escape_string('Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
-You must add these codes to ".htaccess" file before set it to "On":
-<pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
-RewriteEngine <strong>on</strong>
-RewriteRule <strong>^tag-(.*?)\.html$ tag.php?name=$1</strong> <em>[L,QSA]</em>
-RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
-</pre>'),
-			"optionscode"	=> "yesno",
-			"value"			=> 0,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		),
-		array(
-			"name"			=> "tags_per_page",
-			"title"			=> "Tags per page",
-			"description"	=> $db->escape_string('How many tags shown in "Tags" page?'),
-			"optionscode"	=> "text",
-			"value"			=> 10,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		),
-		array(
-			"name"			=> "tags_limit",
-			"title"			=> $db->escape_string('Limit Tags in "Index Page" and "Forum Display Page"'),
-			"description"	=> $db->escape_string('How many tags shown in "Index Page" and "Forum Display Page" ?'),
-			"optionscode"	=> "text",
-			"value"			=> 50,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		),
-		array(
-			"name"			=> "tags_index",
-			"title"			=> $db->escape_string('Show tags in Index Page?'),
-			"description"	=> $db->escape_string('Do you want tags shown in Index Page?'),
-			"optionscode"	=> "yesno",
-			"value"			=> 1,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		),
-		array(
-			"name"			=> "tags_forumdisplay",
-			"title"			=> $db->escape_string('Show tags in "Forum Display" Page?'),
-			"description"	=> $db->escape_string('Do you want tags shown in "Forum Display" Page?'),
-			"optionscode"	=> "yesno",
-			"value"			=> 1,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		),
-		array(
-			"name"			=> "tags_max_thread",
-			"title"			=> $db->escape_string('Maximun tags for a thread'),
-			"description"	=> $db->escape_string('Please enter the maximum number of tags for threads. Set it to 0 for unlimited.'),
-			"optionscode"	=> "text",
-			"value"			=> 20,
-			"disporder"		=> ++$i,
-			"gid"			=> $gid
-		)
-	);
-	$db->insert_query_multiple("settings", $settings);
-	
-
-	rebuild_settings();
-	
 	// Create our entries table
 	$collation = $db->build_create_table_collation();
 	
@@ -382,6 +383,19 @@ function tags_uninstall()
 	
 	$db->drop_table('tags');
 
+}
+
+function tags_setting_value($setting, $value)
+{
+	global $mybb;
+	if(isset($mybb->settings[$setting]))
+	{
+		return $mybb->settings[$setting];
+	}
+	else
+	{
+		return $value;
+	}
 }
 
 function tags_getsize($v)
