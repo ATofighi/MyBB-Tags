@@ -97,7 +97,14 @@ $tag_link = get_tag_link();
 
 if($name && $mybb->settings['tags_seo'] && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name) && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name)."?page={$page}")
 {
-	header("location: ".get_tag_link($url_name));
+	if($page)
+	{
+		header("location: ".get_tag_link($url_name)."?page={$page}");
+	}
+	else
+	{
+		header("location: ".get_tag_link($url_name));
+	}
 	exit;
 }
 

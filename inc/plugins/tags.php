@@ -48,12 +48,17 @@ function tags_info()
 
 function tags_activate()
 {
+	global $mybb, $db;
 	if(!function_exists('find_replace_templatesets'))
 	{
 		require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
 	}
 	
 	// add settings
+	
+	$query = $db->simple_select('settinggroups', 'gid', "name='tags'");
+	$gid = $db->fetch_field($query, 'gid');
+
 	$i = 0;
 	$settings = array(
 		array(
@@ -61,7 +66,7 @@ function tags_activate()
 			"title"			=> "Enable Plugin",
 			"description"	=> $db->escape_string('Set to "on" if you want Enable this plugin.'),
 			"optionscode"	=> "onoff",
-			"value"			=> tags_setting_value("tags_enabled", 0),
+			"value"			=> tags_setting_value("tags_enabled", 1),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
 		),
@@ -416,7 +421,7 @@ function tags_setting_value($setting, $value)
 	}
 }
 
-function tags_getbads($and = true)
+function tags_getbads($and = true, $prefix = true)
 {
 	global $mybb;
 	$b = $mybb->settings['tags_bad'];
@@ -426,15 +431,26 @@ function tags_getbads($and = true)
 	$tags_hash = array();
 	foreach($tags as $tag)
 	{
-		array_push($tags_hash, "'".md5($tag)."'");
+		if($tag != '')
+		{
+			continue;
+		}
+
+		if(!in_array("'".md5($tag)."'", $tags_hash))
+		{
+			array_push($tags_hash, "'".md5($tag)."'");
+		}
 	}
 	$r = '';
 	if($and)
 	{
-		$r .= 'AND ';
+		$r .= ' AND ';
 	}
-
-	$r .= 'tag.hash NOT IN('.implode(', ', $tags_hash).')';
+	if($prefix)
+	{
+		$r .= 'tag.';
+	}
+	$r .= 'hash NOT IN ('.implode(', ', $tags_hash).')';
 	return $r;
 }
 
@@ -568,12 +584,15 @@ function tags_editpost()
 	$tags_value = $mybb->get_input('tags');
 	if(!$tags_value)
 	{
-		$bad_tags = tags_getbads(true);
+		$bad_tags = tags_getbads(true, false);
 		$query = $db->simple_select('tags', '*', "tid='{$thread['tid']}'{$bad_tags}");
 		$thread['tags'] = array();
 		while($tag = $db->fetch_array($query))
 		{
-			array_push($thread['tags'], $tag['name']);
+			if(!in_array($tag['name'], $thread['tags']))
+			{
+				array_push($thread['tags'], $tag['name']);
+			}
 		}		
 		$tags_value = implode(',',$thread['tags']);
 	}
@@ -611,11 +630,18 @@ function tags_thread(&$datahandler)
 	$tags_insert = array();
 	foreach($tags as $tag)
 	{
-		array_push($tags_insert, array(
-			'tid' => $tid,
-			'name' => $tag,
-			'hash' => md5($tag)
-		));
+		if(!in_array(array(
+				'tid' => $tid,
+				'name' => $tag,
+				'hash' => md5($tag)
+			), $tags_insert))
+		{
+			array_push($tags_insert, array(
+				'tid' => $tid,
+				'name' => $tag,
+				'hash' => md5($tag)
+			));
+		}
 	}
 
 
@@ -668,11 +694,14 @@ function tags_showthread()
 	$tid = $thread['tid'];
 	$thread['tags'] = array();
 
-	$bad_tags = tags_getbads(true);
+	$bad_tags = tags_getbads(true, false);
 	$query = $db->simple_select('tags', '*', "tid='{$tid}'{$bad_tags}");
 	while($tag = $db->fetch_array($query))
 	{
-		array_push($thread['tags'], $tag['name']);
+		if(!in_array($tag['name'], $thread['tags']))
+		{
+			array_push($thread['tags'], $tag['name']);
+		}
 	}
 	if($db->num_rows($query) == 0)
 	{
@@ -682,11 +711,18 @@ function tags_showthread()
 		$tags_insert = array();
 		foreach($tags as $tag)
 		{
-			array_push($tags_insert, array(
-				'tid' => $tid,
-				'name' => $tag,
-				'hash' => md5(my_strtolower($tag))
-			));
+			if(!in_array(array(
+					'tid' => $tid,
+					'name' => $tag,
+					'hash' => md5($tag)
+				), $tags_insert))
+			{
+				array_push($tags_insert, array(
+					'tid' => $tid,
+					'name' => $tag,
+					'hash' => md5($tag)
+				));
+			}
 		}
 
 		$db->delete_query("tags", "tid={$tid}");
