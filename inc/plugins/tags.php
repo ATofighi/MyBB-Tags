@@ -468,7 +468,7 @@ function tags_getbads($and = true, $prefix = true)
 			continue;
 		}
 
-		if(!in_array("'".md5($tag)."'", $tags_hash))
+		if($tag && !in_array("'".md5($tag)."'", $tags_hash))
 		{
 			array_push($tags_hash, "'".md5($tag)."'");
 		}
@@ -628,7 +628,7 @@ function tags_editpost()
 		$thread['tags'] = array();
 		while($tag = $db->fetch_array($query))
 		{
-			if(!in_array($tag['name'], $thread['tags']))
+			if(!in_array($tag['name'], $thread['tags']) && $tag['name'] != '')
 			{
 				array_push($thread['tags'], $tag['name']);
 			}
@@ -669,7 +669,7 @@ function tags_thread(&$datahandler)
 	$tags_insert = array();
 	foreach($tags as $tag)
 	{
-		if(!in_array(array(
+		if($tag && !in_array(array(
 				'tid' => $tid,
 				'name' => $tag,
 				'hash' => md5($tag)
@@ -751,7 +751,7 @@ function tags_showthread()
 	$query = $db->simple_select('tags', '*', "tid='{$tid}'{$bad_tags}");
 	while($tag = $db->fetch_array($query))
 	{
-		if(!in_array($tag['name'], $thread['tags']))
+		if($tag['name'] && !in_array($tag['name'], $thread['tags']))
 		{
 			array_push($thread['tags'], $tag['name']);
 		}
@@ -764,7 +764,7 @@ function tags_showthread()
 		$tags_insert = array();
 		foreach($tags as $tag)
 		{
-			if(!in_array(array(
+			if($tag && !in_array(array(
 					'tid' => $tid,
 					'name' => $tag,
 					'hash' => md5($tag)
@@ -864,6 +864,10 @@ function tags_index()
 
 	while($tag = $db->fetch_array($query))
 	{
+		if(!$tag['name'])
+		{
+			continue;
+		}
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
 		$tag['tag_link'] = get_tag_link($tag['name']);
 		$tag['size'] = tags_getsize($tag['sumviews']);
@@ -934,6 +938,11 @@ function tags_forumdisplay()
 
 	while($tag = $db->fetch_array($query))
 	{
+		if(!$tag['name'])
+		{
+			continue;
+		}
+
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
 		$tag['tag_link'] = get_tag_link($tag['name']);
 		$tag['size'] = tags_getsize($tag['sumviews']);
