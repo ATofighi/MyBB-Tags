@@ -457,13 +457,13 @@ function tags_getbads($and = true, $prefix = true)
 {
 	global $mybb;
 	$b = $mybb->settings['tags_bad'];
-	$b = str_replace("\n", ',', $b);
+	$b = str_replace(array("\r\n", "\n", "\r"), ',', $b);
 	$b = tags_string2tag($b);
 	$tags = explode(',', $b);
 	$tags_hash = array();
 	foreach($tags as $tag)
 	{
-		if($tag != '')
+		if($tag == '')
 		{
 			continue;
 		}
@@ -483,7 +483,14 @@ function tags_getbads($and = true, $prefix = true)
 		$r .= 'tag.';
 	}
 	$r .= 'hash NOT IN ('.implode(', ', $tags_hash).')';
-	return $r;
+	if(count($tags_hash))
+	{
+		return $r;
+	}
+	else
+	{
+		return '';
+	}
 }
 
 function tags_getsize($v)
