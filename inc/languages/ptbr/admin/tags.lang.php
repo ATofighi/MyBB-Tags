@@ -32,3 +32,5 @@ $l['setting_tags_forumdisplay'] = 'Mostrar etiquetas em "Forum Display" ?';
 $l['setting_tags_forumdisplay_desc'] = 'Você deseja mostrar etiquetas na página  "Forum Display"?';
 $l['setting_tags_max_thread'] = 'Maximun tags for a thread';//English
 $l['setting_tags_max_thread_desc'] = 'Please enter the maximum number of tags for threads. Set it to 0 for unlimited.';//English
+$l['setting_tags_groups'] = 'Tags Moderators';//English
+$l['setting_tags_groups_desc'] = 'Please select the groups can edit "tags". please note who can edit tags, that can edit thread.';//English

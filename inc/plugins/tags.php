@@ -124,6 +124,15 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"value"			=> tags_setting_value("tags_max_thread", 20),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_groups",
+			"title"			=> $db->escape_string('Tags Moderators'),
+			"description"	=> $db->escape_string('Please select the groups can edit "tags". please note who can edit tags, that can edit thread.'),
+			"optionscode"	=> "groupselect",
+			"value"			=> tags_setting_value("tags_groups", -1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
 		)
 	);
 
@@ -494,7 +503,7 @@ function tags_newthread()
 {
 	global $mybb, $db, $templates, $tags, $tags_value, $lang;
 
-	if($mybb->settings['tags_enabled'] == 0)
+	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
@@ -513,7 +522,7 @@ function tags_editpost()
 {
 	global $mybb, $db, $lang, $templates, $thread, $post, $tags, $tags_value;
 
-	if($mybb->settings['tags_enabled'] == 0)
+	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
@@ -549,7 +558,7 @@ function tags_thread(&$datahandler)
 {
 	global $mybb, $db;
 
-	if($mybb->settings['tags_enabled'] == 0)
+	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
@@ -588,6 +597,12 @@ $plugins->add_hook("datahandler_post_validate_post", "tags_validate");
 function tags_validate(&$datahandler)
 {
 	global $mybb, $db, $thread, $lang;
+	
+	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
+	{
+		return;
+	}
+
 	$lang->load('tags');
 	$mybb->settings['tags_max_thread'] = (int)$mybb->settings['tags_max_thread'];
 

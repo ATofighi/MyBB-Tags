@@ -34,3 +34,5 @@ $l['setting_tags_forumdisplay'] = 'Show tags in "Forum Display" Page?';
 $l['setting_tags_forumdisplay_desc'] = 'Do you want tags shown in "Forum Display" Page?';
 $l['setting_tags_max_thread'] = 'Maximun tags for a thread';
 $l['setting_tags_max_thread_desc'] = 'Please enter the maximum number of tags for threads. Set it to 0 for unlimited.';
+$l['setting_tags_groups'] = 'Tags Moderators';
+$l['setting_tags_groups_desc'] = 'Please select the groups can edit "tags". please note who can edit tags, that can edit thread.';
