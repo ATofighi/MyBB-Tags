@@ -71,6 +71,15 @@ function tags_activate()
 			"gid"			=> $gid
 		),
 		array(
+			"name"			=> "tags_droptable",
+			"title"			=> $db->escape_string('Drop table?'),
+			"description"	=> $db->escape_string('Do you want the "tags" table droped when you uninstall this plugin?'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_droptable", 1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
 			"name"			=> "tags_seo",
 			"title"			=> "SEO Friendly URL",
 			"description"	=> $db->escape_string('Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
@@ -147,12 +156,29 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"value"			=> tags_setting_value("tags_bad", ''),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_maxchars",
+			"title"			=> $db->escape_string('Maximum tag length'),
+			"description"	=> $db->escape_string('Please enter the maximum length that a tag can have'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_maxchars", 65),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_minchars",
+			"title"			=> $db->escape_string('Minimum tag length'),
+			"description"	=> $db->escape_string('Please enter the minimum length that a tag can have'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_minchars", 0),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
 		)
 	);
 
 	$db->delete_query('settings', "name LIKE 'tags\_%'");
 	$db->insert_query_multiple("settings", $settings);
-	
 
 	rebuild_settings();
 
@@ -194,7 +220,9 @@ function tags_install()
 	$("#tags").tagsInput({
 		\'height\': \'40px\',
 		\'width\': \'auto\',
-		\'defaultText\': \'{$lang->tags_placeholder}\'
+		\'defaultText\': \'{$lang->tags_placeholder}\',
+		\'minChars\': {$mybb->settings[\'tags_minchars\']},
+		\'maxChars\': {$mybb->settings[\'tags_maxchars\']}
 	});
 
 	$("#tags").on(\'change\', function()
@@ -356,27 +384,28 @@ function tags_install()
 	// Create our entries table
 	$collation = $db->build_create_table_collation();
 	
-	$db->drop_table('tags');
-
-	if($db->type == 'pgsql')
+	if(!$db->table_exists('tags'))
 	{
-		$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
-				`id` serial,
-				`tid` int NOT NULL default '0',
-				`name` varchar(200)  NOT NULL default '',
-				`hash` varchar(200)  NOT NULL default '',
-				PRIMARY KEY  (`id`)
-			) ENGINE=MyISAM{$collation}");
-	}
-	else
-	{
-		$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
-				`id` int(10) UNSIGNED NOT NULL auto_increment,
-				`tid` int(100) UNSIGNED NOT NULL default '0',
-				`name` varchar(200)  NOT NULL default '',
-				`hash` varchar(200)  NOT NULL default '',
-				PRIMARY KEY  (`id`)
-			) ENGINE=MyISAM{$collation}");
+		if($db->type == 'pgsql')
+		{
+			$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
+					`id` serial,
+					`tid` int NOT NULL default '0',
+					`name` varchar(200)  NOT NULL default '',
+					`hash` varchar(200)  NOT NULL default '',
+					PRIMARY KEY  (`id`)
+				) ENGINE=MyISAM{$collation}");
+		}
+		else
+		{
+			$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
+					`id` int(10) UNSIGNED NOT NULL auto_increment,
+					`tid` int(100) UNSIGNED NOT NULL default '0',
+					`name` varchar(200)  NOT NULL default '',
+					`hash` varchar(200)  NOT NULL default '',
+					PRIMARY KEY  (`id`)
+				) ENGINE=MyISAM{$collation}");
+		}
 	}
 }
 
@@ -384,7 +413,7 @@ function tags_is_installed()
 {
 	global $db;
 
-	if($db->table_exists("tags"))
+	if($db->table_exists("tags") && isset($mybb->settings['tags_enabled']))
 	{
 		return true;
 	}
@@ -402,9 +431,12 @@ function tags_uninstall()
 	
 	$db->delete_query('settings', "name LIKE 'tags\_%'");
 	
-	rebuild_settings();
+	if($mybb->settings['tags_droptable'])
+	{
+		$db->drop_table('tags');
+	}
 	
-	$db->drop_table('tags');
+	rebuild_settings();
 
 }
 
@@ -673,6 +705,20 @@ function tags_validate(&$datahandler)
 		{
 			$lang->many_tags = $lang->sprintf($lang->many_tags, $mybb->settings['tags_max_thread']);
 			$datahandler->set_error($lang->many_tags);
+			return;
+		}
+		foreach($tags as $tag)
+		{
+			if(my_strlen($tag) > 0 && my_strlen($tag) < $mybb->settings['tags_minchars'])
+			{
+				$datahandler->set_error($lang->tags_too_short);
+				return;
+			}
+			elseif(my_strlen($tag) > $mybb->settings['tags_maxchars'] && $mybb->settings['tags_maxchars'] > 0)
+			{
+				$datahandler->set_error($lang->tags_too_long);
+				return;
+			}
 		}
 	}
 }

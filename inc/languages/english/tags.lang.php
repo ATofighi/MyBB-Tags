@@ -19,3 +19,5 @@ $l['tags_views'] = "Views";
 $l['tags_notags'] = "Sorry, but no results were returned using the query information you provided. Please redefine your tag and try again.";
 $l['tags_disabled'] = 'Sorry, but tags is disabled.';
 $l['many_tags'] = 'You enter a lot of tags for this thread, You can only enter {1} tags.';
+$l['tags_too_short'] = 'The length of tag you entered is too short.';
+$l['tags_too_long'] = 'The length of tag you entered is too long.';
