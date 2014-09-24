@@ -68,6 +68,80 @@ else
 	$inactivewhere = '';
 }
 
+if($mybb->get_input('action') == 'sitemap-index')
+{
+	$bad_tags = tags_getbads(true);
+
+	$query = $db->query("SELECT COUNT(thread.tid) as numrows from `".TABLE_PREFIX."tags` tag
+						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
+						 WHERE thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 limit 1");
+	$nums = $db->fetch_array($query);
+	$count = $nums['numrows'];
+	$pages = $count / $mybb->settings['tags_per_page'];
+	$pages = ceil($pages);
+	$sitemaps = '';
+	for($i = 1; $i <= $pages; $i++)
+	{
+		$sitemaps .= <<<EOT
+  <sitemap>
+    <loc>{$mybb->settings['bburl']}/tag.php?action=sitemap&amp;page={$i}</loc>
+  </sitemap>
+EOT;
+	}
+
+	header('Content-type: text/xml');
+	echo <<<EOT
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{$sitemaps}
+</sitemapindex>
+EOT;
+	exit;
+}
+elseif($mybb->get_input('action') == 'sitemap')
+{
+	$query = $db->simple_select('threads', 'MAX(views) as maxviews', "", array("limit" => 1));
+	$maxviews = $db->fetch_field($query, 'maxviews');
+	$page = $mybb->get_input('page', 1);
+	if($page < 1)
+		$page = 1;
+
+	$start = ($page-1) * 300;
+
+	$bad_tags = tags_getbads(true);
+
+	$query = $db->query("SELECT MAX(thread.dateline) as lastmod, SUM(views) as sumviews, tag.* from `".TABLE_PREFIX."tags` tag
+						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
+						 WHERE thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 GROUP BY tag.hash
+						 ORDER BY sumviews DESC
+						LIMIT {$start}, 300");
+	$sitemaps = '';
+	while($tag = $db->fetch_array($query))
+	{
+		$url = get_tag_link(urldecode(str_replace(',','-',$tag['name'])));
+		$lastmod = date('c', $tag['lastmod']);
+		$priority = min(round($tag['sumviews']/$maxviews, 2), 1);
+		$sitemaps .= <<<EOT
+  <url>
+    <loc>{$mybb->settings['bburl']}/{$url}</loc>
+    <lastmod>{$lastmod}</lastmod>
+    <priority>{$priority}</priority>
+  </url>
+EOT;
+	}
+
+	header('Content-type: text/xml');
+	echo <<<EOT
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{$sitemaps}
+</urlset>
+EOT;
+	exit;
+}
+
 $page = $mybb->get_input('page', 1);
 
 $name = $mybb->get_input('name');
