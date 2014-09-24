@@ -133,6 +133,15 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"value"			=> tags_setting_value("tags_groups", -1),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_bad",
+			"title"			=> $db->escape_string('Bad Tags'),
+			"description"	=> $db->escape_string('Please enter the bad tags, this tags don\'t shown in tags list. enter each tags in new line'),
+			"optionscode"	=> "textarea",
+			"value"			=> tags_setting_value("tags_bad", ''),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
 		)
 	);
 
@@ -407,6 +416,28 @@ function tags_setting_value($setting, $value)
 	}
 }
 
+function tags_getbads($and = true)
+{
+	global $mybb;
+	$b = $mybb->settings['tags_bad'];
+	$b = str_replace("\n", ',', $b);
+	$b = tags_string2tag($b);
+	$tags = explode(',', $b);
+	$tags_hash = array();
+	foreach($tags as $tag)
+	{
+		array_push($tags_hash, "'".md5($tag)."'");
+	}
+	$r = '';
+	if($and)
+	{
+		$r .= 'AND ';
+	}
+
+	$r .= 'tag.hash NOT IN('.implode(', ', $tags_hash).')';
+	return $r;
+}
+
 function tags_getsize($v)
 {
 	global $mybb, $db;
@@ -537,7 +568,8 @@ function tags_editpost()
 	$tags_value = $mybb->get_input('tags');
 	if(!$tags_value)
 	{
-		$query = $db->simple_select('tags', '*', "tid='{$thread['tid']}'");
+		$bad_tags = tags_getbads(true);
+		$query = $db->simple_select('tags', '*', "tid='{$thread['tid']}'{$bad_tags}");
 		$thread['tags'] = array();
 		while($tag = $db->fetch_array($query))
 		{
@@ -636,7 +668,8 @@ function tags_showthread()
 	$tid = $thread['tid'];
 	$thread['tags'] = array();
 
-	$query = $db->simple_select('tags', '*', "tid='{$tid}'");
+	$bad_tags = tags_getbads(true);
+	$query = $db->simple_select('tags', '*', "tid='{$tid}'{$bad_tags}");
 	while($tag = $db->fetch_array($query))
 	{
 		array_push($thread['tags'], $tag['name']);
@@ -729,10 +762,12 @@ function tags_index()
 		$order_by = 'RANDOM()';
 	}
 
+	$bad_tags = tags_getbads(true);
+
 	$query = $db->query("SELECT SUM(thread.views) as sumviews, tag.name from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
-						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1'{$bad_tags}{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY tag.hash
 						 ORDER BY {$order_by}
 						 LIMIT 0, {$mybb->settings['tags_limit']}");
@@ -797,10 +832,12 @@ function tags_forumdisplay()
 		$order_by = 'RANDOM()';
 	}
 
+	$bad_tags = tags_getbads(true);
+
 	$query = $db->query("SELECT SUM(thread.views) as sumviews, tag.name from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
-						 WHERE thread.tid > 0 And post.pid > 0 and thread.visible='1' AND thread.fid = '{$fid}' AND thread.closed NOT LIKE 'moved|%'
+						 WHERE thread.tid > 0{$bad_tags} And post.pid > 0 and thread.visible='1' AND thread.fid = '{$fid}' AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY tag.hash
 						 ORDER BY {$order_by}
 						 LIMIT 0, {$mybb->settings['tags_limit']}");

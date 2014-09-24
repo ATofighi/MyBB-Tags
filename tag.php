@@ -111,9 +111,11 @@ else
 {
 	add_breadcrumb($name, get_tag_link($name));
 
+	$bad_tags = tags_getbads(true);
+
 	$query = $db->query("SELECT COUNT(thread.tid) as numrows from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
-						 WHERE tag.hash IN ({$hash}) And thread.tid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 WHERE tag.hash IN ({$hash}) And thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 limit 1");
 	$nums = $db->fetch_array($query);
 	$count = $nums['numrows'];
@@ -137,10 +139,12 @@ else
 
 	$multipage = multipage($count, $mybb->settings['tags_per_page'], $page, get_tag_link($name));
 
+	$bad_tags = tags_getbads(true);
+
 	$query = $db->query("SELECT thread.tid, post.message, post.username, post.uid, thread.subject, thread.views, thread.replies from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
-						 WHERE tag.hash IN ({$hash}) And thread.tid > 0 And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
+						 WHERE tag.hash IN ({$hash}) And thread.tid > 0{$bad_tags} And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
 						 GROUP BY thread.tid
 						LIMIT {$start}, {$mybb->settings['tags_per_page']}");
 

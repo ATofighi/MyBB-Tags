@@ -34,3 +34,5 @@ $l['setting_tags_max_thread'] = 'Maximun tags for a thread';//English
 $l['setting_tags_max_thread_desc'] = 'Please enter the maximum number of tags for threads. Set it to 0 for unlimited.';//English
 $l['setting_tags_groups'] = 'Tags Moderators';//English
 $l['setting_tags_groups_desc'] = 'Please select the groups can edit "tags". please note who can edit tags, that can edit thread.';//English
+$l['setting_tags_bad'] = 'Bad Tags';//English
+$l['setting_tags_bad_desc'] = 'Please enter the bad tags, this tags don\'t shown in tags list. enter each tags in new line';//English
