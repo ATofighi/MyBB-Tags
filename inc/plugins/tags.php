@@ -162,7 +162,7 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"title"			=> $db->escape_string('Maximum tag length'),
 			"description"	=> $db->escape_string('Please enter the maximum length that a tag can have'),
 			"optionscode"	=> "text",
-			"value"			=> tags_setting_value("tags_maxchars", 65),
+			"value"			=> tags_setting_value("tags_maxchars", 20),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
 		),
