@@ -13,7 +13,7 @@ $l['setting_group_tags'] = 'Plugin de Etiquetas';
 $l['setting_group_tags_desc'] = "Configurações para Etiquetas.";
 
 $l['setting_tags_enabled'] = "Habilitar plugin?";
-$l['setting_tags_enabled_decs'] = 'Coloque "on" se deseja habilitar o plugin.';
+$l['setting_tags_enabled_desc'] = 'Coloque "on" se deseja habilitar o plugin.';
 $l['setting_tags_seo'] = "URL amigável";
 $l['setting_tags_seo_desc'] = 'Você deseja habilitar URL´s amigáveis (ex: etiquetas-***.html) para etiquetas?<br />
 Você deve adicionar o seguinte código ao seu arquivo ".htaccess" antes de habilitar o plugin:

@@ -72,13 +72,13 @@ if($mybb->get_input('action') == 'sitemap-index')
 {
 	$bad_tags = tags_getbads(true);
 
-	$query = $db->query("SELECT COUNT(thread.tid) as numrows from `".TABLE_PREFIX."tags` tag
+	$query = $db->query("SELECT tag.id from `".TABLE_PREFIX."tags` tag
 						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
 						 WHERE thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
-						 limit 1");
-	$nums = $db->fetch_array($query);
-	$count = $nums['numrows'];
-	$pages = $count / $mybb->settings['tags_per_page'];
+						 GROUP BY tag.hash");
+	$count = $db->num_rows($query);
+	unset($query);
+	$pages = $count / 300;
 	$pages = ceil($pages);
 	$sitemaps = '';
 	for($i = 1; $i <= $pages; $i++)

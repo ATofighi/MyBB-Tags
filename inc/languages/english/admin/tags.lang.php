@@ -15,7 +15,7 @@ $l['setting_group_tags'] = 'Tags Plugin';
 $l['setting_group_tags_desc'] = "Settings for Tags Plugin.";
 
 $l['setting_tags_enabled'] = "Enable Plugin?";
-$l['setting_tags_enabled_decs'] = 'Set "on" if you want Enable this plugin.';
+$l['setting_tags_enabled_desc'] = 'Set "on" if you want Enable this plugin.';
 $l['setting_tags_seo'] = "SEO Friendly URL";
 $l['setting_tags_seo_desc'] = 'Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
 You must add these codes to ".htaccess" file before set it "On":
