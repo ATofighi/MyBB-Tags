@@ -240,6 +240,8 @@ function tags_install()
 	display: inline-block;
 	vertical-align: middle;
 	box-sizing: content-box;
+	word-wrap: normal;
+	word-spacing: normal;
 	position: relative;
 	height: 24px;
 	font-size: 11px;
