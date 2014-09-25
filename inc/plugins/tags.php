@@ -235,6 +235,137 @@ function tags_install()
 		array(
 			"title" => 'tags_box',
 			"template" => $db->escape_string('<br class="clear" />
+<style type="text/css">
+.tag {
+	display: inline-block;
+	vertical-align: middle;
+	box-sizing: content-box;
+	position: relative;
+	height: 24px;
+	font-size: 11px;
+	padding:0 10px 0 12px;
+	background:#0089e0;
+	text-shadow: -1px -1px 3px #555;
+	color:#fff;
+	text-decoration:none;
+	-moz-border-radius-bottomright:4px;
+	-webkit-border-bottom-right-radius:4px;	
+	border-bottom-right-radius:4px;
+	-moz-border-radius-topright:4px;
+	-webkit-border-top-right-radius:4px;	
+	border-top-right-radius:4px;	
+}
+
+.tag:link, .tag:hover, .tag:visited, .tag:active {
+	color:#fff;
+	text-decoration: none;
+}
+
+.tag:before{
+	content:"";
+	float:left;
+	position:absolute;
+	top:0;
+	right: 100%;
+	width:0;
+	height:0;
+	border-color:transparent #0089e0 transparent transparent;
+	border-style:solid;
+	border-width:12px 12px 12px 0;		
+}
+
+.tag:after{
+	content:"";
+	position:absolute;
+	top:50%;
+	left:0;
+	margin-top:-2px;
+	float:left;
+	width:4px;
+	height:4px;
+	-moz-border-radius:2px;
+	-webkit-border-radius:2px;
+	border-radius:2px;
+	background:#fff;
+	-moz-box-shadow:-1px -1px 2px #004977;
+	-webkit-box-shadow:-1px -1px 2px #004977;
+	box-shadow:-1px -1px 2px #004977;
+}
+
+.tag:hover{
+	background:#555;
+}
+
+.tag:hover:before{
+	border-color: transparent #555 transparent transparent;
+}
+
+.tag.tag-h1 {
+	font-size: 32px;
+	height: 42px;
+	margin-left: 21px;
+}
+
+.tag.tag-h1:before {
+	border-width: 21px;
+	border-left-width:0;
+}
+
+.tag.tag-h2 {
+	font-size: 24px;
+	height: 34px;
+	margin-left: 17px;
+}
+
+.tag.tag-h2:before {
+	border-width: 17px;
+	border-left-width:0;
+}
+
+.tag.tag-h3 {
+	font-size: 20px;
+	height: 28px;
+	margin-left: 14px;
+}
+
+.tag.tag-h3:before {
+	border-width: 14px;
+	border-left-width:0;
+}
+
+.tag.tag-h4 {
+	font-size: 17px;
+	height: 24px;
+	margin-left: 12px;
+}
+
+.tag.tag-h4:before {
+	border-width: 12px;
+	border-left-width:0;
+}
+
+.tag.tag-h5 {
+	font-size: 14px;
+	height: 20px;
+	margin-left:10px;
+}
+
+.tag.tag-h5:before {
+	border-width: 10px;
+	border-left-width:0;
+}
+
+.tag.tag-h6 {
+	font-size: 11px;
+	height: 16px;
+	margin-left:8px
+}
+
+.tag.tag-h6:before {
+	border-width: 8px;
+	border-left-width:0;
+}
+</style>
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder tfixed clear">
 	<thead>
 	<tr>
@@ -259,13 +390,13 @@ function tags_install()
 		array(
 			"title" => 'tags_box_tag',
 			"template" => $db->escape_string('
-{$comma}<a href="{$mybb->settings[\'bburl\']}/{$tag_link}" title="{$tag}">{$tag}</a>
+ <a href="{$mybb->settings[\'bburl\']}/{$tag_link}" title="{$tag}" class="tag tag-h5">{$tag}</a>
 '),
 			"sid" => "-1"
 		),
 		array(
 			"title" => 'tags_box_tag_sized',
-			"template" => $db->escape_string('{$comma}<a href="{$tag[\'tag_link\']}" style="font-size:{$tag[\'size\']}px">{$tag[\'name\']}</a>'),
+			"template" => $db->escape_string(' <a href="{$tag[\'tag_link\']}" class="tag tag-h{$tag[\'size\']}">{$tag[\'name\']}</a>'),
 			"sid" => "-1"
 		),
 		array(
@@ -411,9 +542,9 @@ function tags_install()
 
 function tags_is_installed()
 {
-	global $db;
+	global $db, $mybb;
 
-	if($db->table_exists("tags") && isset($mybb->settings['tags_enabled']))
+	if(isset($mybb->settings['tags_enabled']))
 	{
 		return true;
 	}
@@ -495,35 +626,39 @@ function tags_getbads($and = true, $prefix = true)
 
 function tags_getsize($v)
 {
-	global $mybb, $db;
-	$query = $db->simple_select('threads', 'MAX(views) as maxviews', "", array("limit" => 1));
-	$maxviews = $db->fetch_field($query, 'maxviews');
+	global $mybb, $db, $mybb_tags_my_maxviews;
+	if(!isset($mybb_tags_my_maxviews))
+	{
+		$query = $db->simple_select('threads', 'MAX(views) as maxviews', "", array("limit" => 1));
+		$maxviews = $db->fetch_field($query, 'maxviews');
+		$mybb_tags_my_maxviews = $maxviews;
+	}
+	else
+	{
+		$maxviews = $mybb_tags_my_maxviews;
+	}
 
 	if($v >= $maxviews)
 	{
-		return 48;
+		return 1;
 	}
 	if($v >= $maxviews/2)
 	{
-		return 32;
+		return 2;
 	}
 	if($v >= $maxviews/4)
 	{
-		return 24;
+		return 3;
 	}
 	if($v >= $maxviews/7)
 	{
-		return 16;
+		return 4;
 	}
-	if($v >= $maxviews/13)
+	if($v >= $maxviews/15)
 	{
-		return 14;
+		return 5;
 	}
-	if($v >= $maxviews/20)
-	{
-		return 12;
-	}
-	return 8;
+	return 6;
 }
 
 function tags_string2tag($s)
