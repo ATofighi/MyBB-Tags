@@ -1,6 +1,6 @@
 <?php
 /**
- * MyBB 1.8
+ * MyBB-Tags 2
  * Copyright 2014 My-BB.Ir Group, All Rights Reserved
  *
  * By: AliReza_Tofighi

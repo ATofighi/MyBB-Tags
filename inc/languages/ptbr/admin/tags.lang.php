@@ -40,5 +40,5 @@ $l['setting_tags_droptable'] = 'Remover Tabelas?';
 $l['setting_tags_droptable_desc'] = 'Você deseja que as "etiquetas" sejam removidas na desinstalação do plugin?';
 $l['setting_tags_maxchars'] = 'Tamanho Máximo da Etiqueta';
 $l['setting_tags_maxchars_desc'] = 'Insira o tamanho máximo que uma etiqueta pode ter';
-$l['setting_tags_minchars'] = 'Tamanho Mínimo da Etiqueta';//English
+$l['setting_tags_minchars'] = 'Tamanho Mínimo da Etiqueta';
 $l['setting_tags_minchars_desc'] = 'Insira o tamanho mínimo que uma etiqueta pode ter';
