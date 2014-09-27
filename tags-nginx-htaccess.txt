@@ -1,0 +1,2 @@
+rewrite ^/tag-(.*?)\.html$ /tag.php?name=$1 break;
+rewrite ^/tag\.html$ /tag.php break;
