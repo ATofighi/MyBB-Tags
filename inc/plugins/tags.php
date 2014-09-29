@@ -185,6 +185,7 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$ratethread}').'#', '{$ratethread}{$tags}');
+	find_replace_templatesets('showthread', '#'.preg_quote('{$headerinclude}').'#', '<meta name="keywords" content="{$thread[\'tags_meta\']}" />{$headerinclude}');
 	find_replace_templatesets('index', '#'.preg_quote('{$forums}').'#', '{$forums}{$tags}');
 	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$threadslist}').'#', '{$threadslist}{$tags}');
 }
@@ -199,6 +200,7 @@ function tags_deactivate()
 	find_replace_templatesets('newthread', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$tags}').'#', '');
+	find_replace_templatesets('showthread', '#'.preg_quote('<meta name="keywords" content="{$thread[\'tags_meta\']}" />').'#', '');
 	find_replace_templatesets('index', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$tags}').'#', '');
 }
@@ -936,9 +938,11 @@ function tags_showthread()
 		$i++;
 	}
 
+	$thread['tags_meta'] = htmlspecialchars_uni(implode(', ', $thread['tags']));
+
 	if($tags != '')
 	{
-	eval('$tags = "'.$templates->get('tags_box').'";');
+		eval('$tags = "'.$templates->get('tags_box').'";');
 	}
 }
 
