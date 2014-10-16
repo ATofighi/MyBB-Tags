@@ -787,7 +787,7 @@ function tags_thread(&$datahandler)
 {
 	global $mybb, $db;
 
-	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
+	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])) || !$mybb->get_input('tags'))
 	{
 		return;
 	}
@@ -823,8 +823,11 @@ function tags_thread(&$datahandler)
 	}
 
 
-	$db->delete_query("tags", "tid='{$tid}'");
-	$db->insert_query_multiple("tags", $tags_insert);
+	if(count($tags_insert) > 0)
+	{
+		$db->delete_query("tags", "tid='{$tid}'");
+		$db->insert_query_multiple("tags", $tags_insert);
+	}
 }
 
 $plugins->add_hook("datahandler_post_validate_thread", "tags_validate");
