@@ -44,3 +44,10 @@ $l['setting_tags_maxchars'] = 'Maximum tag length';
 $l['setting_tags_maxchars_desc'] = 'Please enter the maximum length that a tag can have';
 $l['setting_tags_minchars'] = 'Minimum tag length';
 $l['setting_tags_minchars_desc'] = 'Please enter the minimum length that a tag can have';
+$l['setting_tags_charreplace'] = 'Character Translation';
+$l['setting_tags_charreplace_desc'] = 'If you want translate some characters to other characters, you can use this setting.<br />
+For example if you want replace "a" to "b" and "c" to "d" use this code:<br />
+<pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
+a=>b
+c=>d
+</pre>';

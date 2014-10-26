@@ -174,6 +174,20 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"value"			=> tags_setting_value("tags_minchars", 0),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_charreplace",
+			"title"			=> $db->escape_string('Character Translation'),
+			"description"	=> $db->escape_string('If you want translate some characters to other characters, you can use this setting.<br />
+For example if you want replace "a" to "b" and "c" to "d" use this code:<br />
+<pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
+a=>b
+c=>d
+</pre>'),
+			"optionscode"	=> "textarea",
+			"value"			=> tags_setting_value("tags_charreplace", ''),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
 		)
 	);
 
@@ -670,11 +684,23 @@ function tags_getsize($v)
 
 function tags_string2tag($s)
 {
+	global $mybb;
+
 	$s = my_strtolower($s);
 	$s = ltrim(rtrim(trim($s)));
 	$s = str_replace(array("`","~","!","@","#","$","%","^","&","*","(",")","_","+","-","=","\\","|","]","[","{","}",'"',"'",";",":","/","."," ",">","<"), ",", $s);
 	$s = ltrim(rtrim(trim($s, ','),','),',');
 	$s = preg_replace("#([,]+)#si", ',', $s);
+
+	// https://github.com/ATofighi/MyBB-Tags/issues/33
+	$mybb->settings['tags_charreplace'] = ltrim(rtrim(trim(str_replace(array("\r\n", "\r"),"\n", $mybb->settings['tags_charreplace']))));
+	$translations = explode("\n", $mybb->settings['tags_charreplace']);
+	foreach($translations as $translation)
+	{
+		$translation = explode('=>', $translation, 2);
+		$s = str_replace($translation[0], $translation[1], $s);
+	}
+
 	return $s;
 }
 
