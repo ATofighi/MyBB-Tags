@@ -177,7 +177,7 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 		)
 	);
 
-	$db->delete_query('settings', "name LIKE 'tags\_%'");
+	$db->delete_query('settings', "gid = '{$gid}'");
 	$db->insert_query_multiple("settings", $settings);
 
 	rebuild_settings();
@@ -564,7 +564,10 @@ function tags_uninstall()
 
 	$db->delete_query("settinggroups", "name = 'tags'");
 	
-	$db->delete_query('settings', "name LIKE 'tags\_%'");
+	$query = $db->simple_select('settinggroups', 'gid', "name='tags'");
+	$gid = $db->fetch_field($query, 'gid');
+
+	$db->delete_query('settings', "gid = '{$gid}'");
 	
 	if($mybb->settings['tags_droptable'])
 	{
