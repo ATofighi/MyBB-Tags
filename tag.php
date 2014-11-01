@@ -68,6 +68,20 @@ else
 	$inactivewhere = '';
 }
 
+// get disallowed forums
+$disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
+if($disallowedforums)
+{
+	$disallowedforums = " AND fid NOT IN ($disallowedforums)";
+	$tdisallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
+}
+else
+{
+	$disallowedforums = '';
+}
+$unviewwhere .= $disallowedforums;
+$tunviewwhere .= $tdisallowedforums;
+
 if($mybb->get_input('action') == 'sitemap-index')
 {
 	$bad_tags = tags_getbads(true);
