@@ -188,6 +188,15 @@ c=>d
 			"value"			=> tags_setting_value("tags_charreplace", ''),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_disallowedforums",
+			"title"			=> $db->escape_string('Disallowed forums'),
+			"description"	=> $db->escape_string('Please select the forums you want "Tags" don\'t work on these.'),
+			"optionscode"	=> "forumselect",
+			"value"			=> tags_setting_value("tags_disallowedforums", 0),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
 		)
 	);
 
@@ -645,6 +654,21 @@ function tags_getbads($and = true, $prefix = true)
 	}
 }
 
+function tags_in_disforum($forum)
+{
+	global $mybb;
+
+	$forums = $mybb->settings['tags_disallowedforums'];
+	if($forums == -1)
+	{
+		return true;
+	}
+
+	$forums = explode(',', $forums);
+
+	return in_array($forum, $forums);
+}
+
 function tags_getsize($v)
 {
 	global $mybb, $db, $mybb_tags_my_maxviews;
@@ -736,6 +760,11 @@ function tags_global()
 		define('TAG_URL', "tag.php?name={name}");
 		define('TAG_URL_PAGE', "tag.php");
 	}
+	
+	if($mybb->settings['tags_disallowedforums'] == -1)
+	{
+		$mybb->settings['tags_enabled'] = 0;
+	}
 }
 
 function get_tag_link($name='')
@@ -755,9 +784,9 @@ $plugins->add_hook("newthread_start", "tags_newthread");
 
 function tags_newthread()
 {
-	global $mybb, $db, $templates, $tags, $tags_value, $lang;
+	global $mybb, $db, $templates, $tags, $tags_value, $lang, $fid;
 
-	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($fid) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
@@ -776,7 +805,7 @@ function tags_editpost()
 {
 	global $mybb, $db, $lang, $templates, $thread, $post, $tags, $tags_value;
 
-	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($thread['fid']) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
@@ -816,7 +845,7 @@ function tags_thread(&$datahandler)
 {
 	global $mybb, $db;
 
-	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])) || !$mybb->get_input('tags'))
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->fid) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])) || !$mybb->get_input('tags'))
 	{
 		return;
 	}
@@ -866,7 +895,7 @@ function tags_validate(&$datahandler)
 {
 	global $mybb, $db, $thread, $lang;
 	
-	if($mybb->settings['tags_enabled'] == 0 || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->fid) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
@@ -907,7 +936,7 @@ function tags_showthread()
 {
 	global $mybb, $db, $theme, $lang, $templates, $thread, $tags, $collapsedimg, $collapsed;
 
-	if($mybb->settings['tags_enabled'] == 0)
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($thread['fid']))
 	{
 		return;
 	}
@@ -1018,6 +1047,20 @@ function tags_index()
 		$inactivewhere = '';
 	}
 
+	// get disallowed forums
+	$disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
+	if($disallowedforums)
+	{
+		$disallowedforums = " AND fid NOT IN ($disallowedforums)";
+		$disallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
+	}
+	else
+	{
+		$disallowedforums = '';
+	}
+	$unviewwhere .= $disallowedforums;
+	$tunviewwhere .= $tdisallowedforums;
+
 	$order_by = 'RAND()';
 	if($db->type == 'pgsql' || $db->type == 'sqlite')
 	{
@@ -1091,6 +1134,20 @@ function tags_forumdisplay()
 	{
 		$inactivewhere = '';
 	}
+
+	// get disallowed forums
+	$disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
+	if($disallowedforums)
+	{
+		$disallowedforums = " AND fid NOT IN ($disallowedforums)";
+		$disallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
+	}
+	else
+	{
+		$disallowedforums = '';
+	}
+	$unviewwhere .= $disallowedforums;
+	$tunviewwhere .= $tdisallowedforums;
 
 	$order_by = 'RAND()';
 	if($db->type == 'pgsql' || $db->type == 'sqlite')

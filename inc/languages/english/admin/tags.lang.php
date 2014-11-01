@@ -51,3 +51,5 @@ For example if you want replace "a" to "b" and "c" to "d" use this code:<br />
 a=>b
 c=>d
 </pre>';
+$l['settings_tags_disallowedforums'] = 'Disallowed forums';
+$l['settings_tags_disallowedforums_desc'] = 'Please select the forums you want "Tags" don\'t work on these.';
