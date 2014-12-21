@@ -1051,12 +1051,12 @@ function tags_index()
 	$disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
 	if($disallowedforums)
 	{
+		$tdisallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
 		$disallowedforums = " AND fid NOT IN ($disallowedforums)";
-		$disallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
 	}
 	else
 	{
-		$disallowedforums = '';
+		$tdisallowedforums = '';
 	}
 	$unviewwhere .= $disallowedforums;
 	$tunviewwhere .= $tdisallowedforums;
@@ -1139,12 +1139,12 @@ function tags_forumdisplay()
 	$disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
 	if($disallowedforums)
 	{
+		$tdisallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
 		$disallowedforums = " AND fid NOT IN ($disallowedforums)";
-		$disallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
 	}
 	else
 	{
-		$disallowedforums = '';
+		$tdisallowedforums = '';
 	}
 	$unviewwhere .= $disallowedforums;
 	$tunviewwhere .= $tdisallowedforums;

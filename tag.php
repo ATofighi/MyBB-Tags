@@ -72,12 +72,12 @@ else
 $disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
 if($disallowedforums)
 {
-	$disallowedforums = " AND fid NOT IN ($disallowedforums)";
 	$tdisallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
+	$disallowedforums = " AND fid NOT IN ($disallowedforums)";
 }
 else
 {
-	$disallowedforums = '';
+	$tdisallowedforums = '';
 }
 $unviewwhere .= $disallowedforums;
 $tunviewwhere .= $tdisallowedforums;
