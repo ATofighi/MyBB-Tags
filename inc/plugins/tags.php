@@ -428,9 +428,9 @@ function tags_install()
 		),
 		array(
 			"title" => 'tags_search',
-			"template" => $db->escape_string('	<html>
+			"template" => $db->escape_string('<html>
 		<head>
-			<title>{$mybb->settings[\'bbname\']} - Tags</title>
+			<title>{$mybb->settings[\'bbname\']} - {$lang->tags}</title>
 			{$headerinclude}
 		</head>
 		<body>
