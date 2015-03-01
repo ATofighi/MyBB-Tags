@@ -27,7 +27,7 @@ function tags_showthread()
 	{
 		if($tag['name'] && !in_array($tag['name'], $thread['tags']))
 		{
-			array_push($thread['tags'], htmlspecialchars($tag['name']));
+			array_push($thread['tags'], $tag['name']);
 		}
 	}
 	if($db->num_rows($query) == 0)
