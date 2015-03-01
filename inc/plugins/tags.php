@@ -569,14 +569,9 @@ function tags_install()
 
 function tags_is_installed()
 {
-	global $db, $mybb;
+	global $mybb;
 
-	if(isset($mybb->settings['tags_enabled']))
-	{
-		return true;
-	}
-
-	return false;
+	return isset($mybb->settings['tags_enabled']);
 }
 
 function tags_uninstall()
