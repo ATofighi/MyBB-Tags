@@ -42,3 +42,5 @@ $l['setting_tags_maxchars'] = 'Tamanho Máximo da Etiqueta';
 $l['setting_tags_maxchars_desc'] = 'Insira o tamanho máximo que uma etiqueta pode ter';
 $l['setting_tags_minchars'] = 'Tamanho Mínimo da Etiqueta';
 $l['setting_tags_minchars_desc'] = 'Insira o tamanho mínimo que uma etiqueta pode ter';
+$l['setting_tags_forceseo'] = 'Force users to use seo URLs?';
+$l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tags-***.html) for tags?';

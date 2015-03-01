@@ -53,3 +53,5 @@ c=>d
 </pre>';
 $l['settings_tags_disallowedforums'] = 'Disallowed forums';
 $l['settings_tags_disallowedforums_desc'] = 'Please select the forums you want "Tags" don\'t work on these.';
+$l['setting_tags_forceseo'] = 'Force users to use seo URLs?';
+$l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tags-***.html) for tags?';
