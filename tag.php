@@ -44,54 +44,11 @@ if($lang->settings['rtl'])
 	$no_dir = 'left';
 }
 
-// get forums user cannot view
-$unviewable = get_unviewable_forums(true);
-if($unviewable)
-{
-	$unviewwhere = " AND fid NOT IN ($unviewable)";
-	$tunviewwhere = " AND thread.fid NOT IN ($unviewable)";
-}
-else
-{
-	$unviewwhere = '';
-}
-
-// get inactive forums
-$inactive = get_inactive_forums();
-if($inactive)
-{
-	$inactivewhere = " AND fid NOT IN ($inactive)";
-	$tinactivewhere = " AND thread.fid NOT IN ($inactive)";
-}
-else
-{
-	$inactivewhere = '';
-}
-
-// get disallowed forums
-$disallowedforums = $db->escape_string($mybb->settings['tags_disallowedforums']);
-if($disallowedforums)
-{
-	$tdisallowedforums = " AND thread.fid NOT IN ($disallowedforums)";
-	$disallowedforums = " AND fid NOT IN ($disallowedforums)";
-}
-else
-{
-	$tdisallowedforums = '';
-}
-$unviewwhere .= $disallowedforums;
-$tunviewwhere .= $tdisallowedforums;
-
 if($mybb->get_input('action') == 'sitemap-index')
 {
 	$bad_tags = tags_getbads(true);
 
-	$query = $db->query("SELECT tag.id from `".TABLE_PREFIX."tags` tag
-						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
-						 WHERE thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
-						 GROUP BY tag.hash");
-	$count = $db->num_rows($query);
-	unset($query);
+	$count = DBTags::count();
 	$pages = $count / 300;
 	$pages = ceil($pages);
 	$sitemaps = '';
@@ -125,12 +82,12 @@ elseif($mybb->get_input('action') == 'sitemap')
 
 	$bad_tags = tags_getbads(true);
 
-	$query = $db->query("SELECT MAX(thread.dateline) as lastmod, SUM(views) as sumviews, tag.* from `".TABLE_PREFIX."tags` tag
-						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
-						 WHERE thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
-						 GROUP BY tag.hash
-						 ORDER BY sumviews DESC
-						LIMIT {$start}, 300");
+	$query = DBTags::get("MAX(threads.dateline) as lastmod, SUM(views) as sumviews, tags.*", '', array(
+		'orderBy' => 'sumviews',
+		'orderType' => 'DESC',
+		'limit' => "{$start}, 300"
+	));
+
 	$sitemaps = '';
 	while($tag = $db->fetch_array($query))
 	{
@@ -183,7 +140,7 @@ add_breadcrumb($lang->tags, get_tag_link());
 $tag_link = get_tag_link();
 
 
-if($name && $mybb->settings['tags_seo'] && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name) && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name)."?page={$page}")
+if($name && $mybb->settings['tags_seo'] && $mybb->settings['tags_forceseo'] && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name) && tags_current_url() != $mybb->settings['bburl'].'/'.get_tag_link($url_name)."?page={$page}")
 {
 	if($page)
 	{
@@ -208,12 +165,7 @@ else
 
 	$bad_tags = tags_getbads(true);
 
-	$query = $db->query("SELECT COUNT(thread.tid) as numrows from `".TABLE_PREFIX."tags` tag
-						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
-						 WHERE tag.hash IN ({$hash}) And thread.tid > 0{$bad_tags} and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
-						 limit 1");
-	$nums = $db->fetch_array($query);
-	$count = $nums['numrows'];
+	$count = DBTags::countThreads("tags.hash IN ({$hash})");
 	$pages = $count / $mybb->settings['tags_per_page'];
 	$pages = ceil($pages);
 
@@ -236,12 +188,14 @@ else
 
 	$bad_tags = tags_getbads(true);
 
-	$query = $db->query("SELECT thread.tid, post.message, post.username, post.uid, thread.subject, thread.views, thread.replies from `".TABLE_PREFIX."tags` tag
-						 LEFT JOIN `".TABLE_PREFIX."threads` thread on(tag.tid = thread.tid)
-						 LEFT JOIN `".TABLE_PREFIX."posts` post on(thread.firstpost = post.pid)
-						 WHERE tag.hash IN ({$hash}) And thread.tid > 0{$bad_tags} And post.pid > 0 and thread.visible='1'{$tunviewwhere}{$tinactivewhere} AND thread.closed NOT LIKE 'moved|%'
-						 GROUP BY thread.tid
-						LIMIT {$start}, {$mybb->settings['tags_per_page']}");
+	$query = DBTags::get(
+		"threads.tid, posts.message, posts.username, posts.uid, threads.subject, threads.views, threads.replies",
+		"tags.hash IN ({$hash})",
+		array(
+			'groupBy' => 'threads.tid',
+			'limit' => "{$start}, {$mybb->settings['tags_per_page']}"
+		)
+	);
 
 	$tags = '';
 	while($tag = $db->fetch_array($query))
