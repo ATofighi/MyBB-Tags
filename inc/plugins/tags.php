@@ -49,10 +49,7 @@ function tags_info()
 function tags_activate()
 {
 	global $mybb, $db;
-	if(!function_exists('find_replace_templatesets'))
-	{
-		require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
-	}
+	require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
 	
 	// add settings
 	
@@ -215,11 +212,7 @@ c=>d
 
 function tags_deactivate()
 {
-	if(!function_exists('find_replace_templatesets'))
-	{
-		require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
-	}
-	
+	require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
 	find_replace_templatesets('newthread', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$tags}').'#', '');
