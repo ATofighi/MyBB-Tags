@@ -1,4 +1,10 @@
 <?php
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 class DBTags
 {
 	function getUnviewable($tableName = '')

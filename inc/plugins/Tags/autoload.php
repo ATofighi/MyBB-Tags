@@ -8,6 +8,12 @@
  *
  */
 
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 // Helpers:
 require_once TAGS_ROOT.'/helpers/getbads.php';
 require_once TAGS_ROOT.'/helpers/getsize.php';

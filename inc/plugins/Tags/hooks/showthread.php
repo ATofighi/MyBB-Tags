@@ -1,4 +1,10 @@
 <?php
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 $plugins->add_hook("showthread_start", "tags_showthread");
 
 function tags_showthread()
@@ -21,7 +27,7 @@ function tags_showthread()
 	{
 		if($tag['name'] && !in_array($tag['name'], $thread['tags']))
 		{
-			array_push($thread['tags'], $tag['name']);
+			array_push($thread['tags'], htmlspecialchars($tag['name']));
 		}
 	}
 	if($db->num_rows($query) == 0)
@@ -34,13 +40,13 @@ function tags_showthread()
 		{
 			if($tag && !in_array(array(
 					'tid' => $tid,
-					'name' => $tag,
+					'name' => $db->escape_string($tag),
 					'hash' => md5($tag)
 				), $tags_insert))
 			{
 				array_push($tags_insert, array(
 					'tid' => $tid,
-					'name' => $tag,
+					'name' => $db->escape_string($tag),
 					'hash' => md5($tag)
 				));
 			}

@@ -1,4 +1,10 @@
 <?php
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 $plugins->add_hook("index_start", "tags_index_start");
 
 function tags_index_start()

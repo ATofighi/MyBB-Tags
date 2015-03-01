@@ -1,4 +1,10 @@
 <?php
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 $plugins->add_hook("newthread_start", "tags_newthread_start");
 
 function tags_newthread_start()

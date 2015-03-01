@@ -1,4 +1,10 @@
 <?php
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 $plugins->add_hook("forumdisplay_end", "tags_forumdisplay_end");
 
 function tags_forumdisplay_end()

@@ -1,4 +1,10 @@
 <?php
+// Make sure we can't access this file directly from the browser.
+if(!defined("IN_MYBB"))
+{
+	die("This file cannot be accessed directly.");
+}
+
 $plugins->add_hook("datahandler_post_insert_thread_end", "tags_thread");
 $plugins->add_hook("datahandler_post_update_end", "tags_thread");
 
@@ -29,13 +35,13 @@ function tags_thread(&$datahandler)
 	{
 		if($tag && !in_array(array(
 				'tid' => $tid,
-				'name' => $tag,
+				'name' => $db->escape_string($tag),
 				'hash' => md5($tag)
 			), $tags_insert))
 		{
 			array_push($tags_insert, array(
 				'tid' => $tid,
-				'name' => $tag,
+				'name' => $db->escape_string($tag),
 				'hash' => md5($tag)
 			));
 		}
