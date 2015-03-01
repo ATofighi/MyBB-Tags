@@ -43,4 +43,6 @@ $l['setting_tags_maxchars_desc'] = 'Insira o tamanho máximo que uma etiqueta po
 $l['setting_tags_minchars'] = 'Tamanho Mínimo da Etiqueta';
 $l['setting_tags_minchars_desc'] = 'Insira o tamanho mínimo que uma etiqueta pode ter';
 $l['setting_tags_forceseo'] = 'Force users to use seo URLs?';
-$l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tags-***.html) for tags?';
+$l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tag-***.html) for tags?';
+$l['setting_tags_urlscheme'] = 'Tags URL scheme';
+$l['setting_tags_urlscheme_desc'] = 'Enter the Tag URL scheme. By default this is tag-{name}.html. Please note that if you change this, you will also need to add a new rewrite rule in your .htaccess file.';

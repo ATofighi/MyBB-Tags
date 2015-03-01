@@ -11,6 +11,6 @@ $plugins->add_hook("admin_settings_print_peekers", "tags_admin_settings_print_pe
 
 function tags_admin_settings_print_peekers(&$peekers)
 {
-	$peekers[] = 'new Peeker($(".setting_tags_seo"), $("#row_setting_tags_forceseo"), 1, true)';
+	$peekers[] = 'new Peeker($(".setting_tags_seo"), $("#row_setting_tags_forceseo, #row_setting_tags_urlscheme"), 1, true)';
 	return $peekers;
 }

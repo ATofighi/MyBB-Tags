@@ -17,7 +17,7 @@ $l['setting_group_tags_desc'] = "تنظیمات برای پلاگین کلمات
 $l['setting_tags_enabled'] = "فعال‌سازی پلاگین؟";
 $l['setting_tags_enabled_desc'] = 'اگر می‌خواهید این پلاگین را فعال‌سازید بر روی «روشن» قرار دهید.';
 $l['setting_tags_seo'] = "آدرس‌های دوستانه برای SEO";
-$l['setting_tags_seo_desc'] = 'آیا شما می‌خواهید که از آدرس‌های دوستانه برای موتور‌های جتسجو (مثل: tags-***.html) برای کلمات کلیدی استفاده شود؟<br />
+$l['setting_tags_seo_desc'] = 'آیا شما می‌خواهید که از آدرس‌های دوستانه برای موتور‌های جتسجو (مثل: tag-***.html) برای کلمات کلیدی استفاده شود؟<br />
 به‌یاد داشته باشید که قبل از فعال‌سازی این پلاگین باید کد‌های زیر را در فایل ".htaccess" قرار دهید:
 <pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
 RewriteEngine <strong>on</strong>
@@ -46,3 +46,5 @@ $l['setting_tags_minchars'] = 'حداقل طول کلمه‌ی کلیدی';
 $l['setting_tags_minchars_desc'] = 'لطفا حداقل طولی که یک کلمه‌ی کلیدی بتواند داشته‌باشد را وارد فرمائید.';
 $l['setting_tags_forceseo'] = 'اجبار کاربران به استفاده از URLهای سئو شده؟';
 $l['setting_tags_forceseo_desc'] = 'آیا شما می‌خواهید که کاربران را اجبار به استفاده از آدرس‌های SEOشده مثل (tag-****.html) کنید؟';
+$l['setting_tags_urlscheme'] = 'ساختار URL کلمات کلیدی';
+$l['setting_tags_urlscheme_desc'] = 'ساختار URL کلمات کلیدی را وارد کنید. به صورت پیش‌فرض این تنظیم tag-{name}.html است. لطفا دقت داشته باشید که درصورت تغییر این تنظیم شما باید فایل .htaccess رانیز تغییر دهید.';

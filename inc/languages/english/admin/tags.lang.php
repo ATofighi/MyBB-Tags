@@ -17,7 +17,7 @@ $l['setting_group_tags_desc'] = "Settings for Tags Plugin.";
 $l['setting_tags_enabled'] = "Enable Plugin?";
 $l['setting_tags_enabled_desc'] = 'Set "on" if you want Enable this plugin.';
 $l['setting_tags_seo'] = "SEO Friendly URL";
-$l['setting_tags_seo_desc'] = 'Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
+$l['setting_tags_seo_desc'] = 'Do you want to use SEO URLs (ex: tag-***.html) for tags?<br />
 You must add these codes to ".htaccess" file before set it "On":
 <pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
 RewriteEngine <strong>on</strong>
@@ -54,4 +54,6 @@ c=>d
 $l['settings_tags_disallowedforums'] = 'Disallowed forums';
 $l['settings_tags_disallowedforums_desc'] = 'Please select the forums you want "Tags" don\'t work on these.';
 $l['setting_tags_forceseo'] = 'Force users to use seo URLs?';
-$l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tags-***.html) for tags?';
+$l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tag-***.html) for tags?';
+$l['setting_tags_urlscheme'] = 'Tags URL scheme';
+$l['setting_tags_urlscheme_desc'] = 'Enter the Tag URL scheme. By default this is tag-{name}.html. Please note that if you change this, you will also need to add a new rewrite rule in your .htaccess file.';

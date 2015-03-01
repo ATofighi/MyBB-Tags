@@ -6,7 +6,14 @@ function tags_global_start()
 	global $mybb;
 	if($mybb->settings['tags_seo'])
 	{
-		define('TAG_URL', "tag-{name}.html");
+		if($mybb->settings['tags_urlscheme'] && strstr($mybb->settings['tags_urlscheme'], '{name}'))
+		{
+			define('TAG_URL', $mybb->settings['tags_urlscheme']);
+		}
+		else
+		{
+			define('TAG_URL', "tag-{name}.html");
+		}
 		define('TAG_URL_PAGE', "tag.html");
 	}
 	else

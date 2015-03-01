@@ -33,7 +33,7 @@ function tags_activate()
 		array(
 			"name"			=> "tags_seo",
 			"title"			=> "SEO Friendly URL",
-			"description"	=> $db->escape_string('Do you want to use SEO URLs (ex: tags-***.html) for tags?<br />
+			"description"	=> $db->escape_string('Do you want to use SEO URLs (ex: tag-***.html) for tags?<br />
 You must add these codes to ".htaccess" file before set it to "On":
 <pre style="background: #f7f7f7;border: 1px solid #ccc;padding: 6px;border-radius: 3px;direction: ltr;text-align: left;font-size: 12px;">
 RewriteEngine <strong>on</strong>
@@ -48,9 +48,18 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 		array(
 			"name"			=> "tags_forceseo",
 			"title"			=> "Force users to use seo URLs?",
-			"description"	=> $db->escape_string('Do you want to force users to use SEO URLs (ex: tags-***.html) for tags?'),
+			"description"	=> $db->escape_string('Do you want to force users to use SEO URLs (ex: tag-***.html) for tags?'),
 			"optionscode"	=> "yesno",
 			"value"			=> tags_setting_value("tags_forceseo", 0),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_urlscheme",
+			"title"			=> "Tags URL scheme",
+			"description"	=> $db->escape_string('Enter the Tag URL scheme. By default this is tag-{name}.html. Please note that if you change this, you will also need to add a new rewrite rule in your .htaccess file.'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_urlscheme", 'tag-{name}.html'),
 			"disporder"		=> ++$i,
 			"gid"			=> $gid
 		),
