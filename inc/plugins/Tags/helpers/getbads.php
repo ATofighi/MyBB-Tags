@@ -55,6 +55,10 @@ function tags_in_disforum($forum)
 	{
 		return true;
 	}
+	elseif($forums == 0)
+	{
+		return false;
+	}
 
 	$forums = explode(',', $forums);
 

@@ -12,7 +12,7 @@ function tags_thread(&$datahandler)
 {
 	global $mybb, $db;
 
-	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->fid) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])) || !$mybb->get_input('tags'))
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->thread_insert_data['fid']) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])) || !$mybb->get_input('tags'))
 	{
 		return;
 	}
