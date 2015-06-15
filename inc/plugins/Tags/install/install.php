@@ -21,7 +21,8 @@ function tags_install()
 		\'width\': \'auto\',
 		\'defaultText\': \'{$lang->tags_placeholder}\',
 		\'minChars\': {$mybb->settings[\'tags_minchars\']},
-		\'maxChars\': {$mybb->settings[\'tags_maxchars\']}
+		\'maxChars\': {$mybb->settings[\'tags_maxchars\']},
+		\'delimiter\': [",", "`","~","!","@","#","$","%","^","&","*","(",")","_","+","-","=","\\\\","|","[","]","{","}",\'"\',"\'",";",":","/","."," ",">","<"]
 	});
 
 	$("#tags").on(\'change\', function()
