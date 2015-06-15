@@ -76,6 +76,7 @@ class DBTags
 		}
 		if($opts['limit'])
 		{
+			$opt['limit'] = (int)$opt['limit'];
 			$query .= "limit {$opt['limit']}\n";
 		}
 
@@ -121,14 +122,14 @@ class DBTags
 	static function findByHash($hash)
 	{
 		global $db;
-		$query = static::get('*', "tags.id = '".$db->escape_string($hash)."'");
+		$query = static::get('*', "tags.hash = '".$db->escape_string($hash)."'");
 		return $db->fetch_array($query);
 	}
 
 	static function findByName($name)
 	{
 		global $db;
-		$query = static::get('*', "tags.id = '".$db->escape_string($name)."'");
+		$query = static::get('*', "tags.name = '".$db->escape_string($name)."'");
 		return $db->fetch_array($query);
 	}
 
