@@ -43,7 +43,7 @@ function tags_info()
 		"website"		=> "http://myb-b.ir",
 		"author"		=> "My-BB.Ir Group",
 		"authorsite"	=> "http://my-bb.ir",
-		"version"		=> "2.0",
+		"version"		=> "3.0",
 		"compatibility" => "18*"
 	);
 }
