@@ -66,17 +66,19 @@ class DBTags
 		$query .= "LEFT JOIN `".TABLE_PREFIX."posts` posts on(threads.firstpost = posts.pid)\n";
 		$query .= "WHERE ".$where."\n";
 
-		if($opts['orderBy'])
-		{
-			$query .= "order by `".TABLE_PREFIX."{$opt['orderBy']}` {$opt['orderType']}\n";
-		}
-		if($opts['groupBy'])
+		if($opt['groupBy'])
 		{
 			$query .= "group by {$opt['groupBy']}\n";
 		}
-		if($opts['limit'])
+		if($opt['orderBy'])
 		{
-			$opt['limit'] = (int)$opt['limit'];
+			if(strstr($opt['orderBy'], '.')) {
+				$opt['orderBy'] = '`'.TABLE_PREFIX.$opt['orderBy'].'`';
+			}
+			$query .= "order by {$opt['orderBy']} {$opt['orderType']}\n";
+		}
+		if($opt['limit'])
+		{
 			$query .= "limit {$opt['limit']}\n";
 		}
 
