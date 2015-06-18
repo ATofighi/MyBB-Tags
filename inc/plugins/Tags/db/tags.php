@@ -46,7 +46,8 @@ class DBTags
 
 	static function get($select = '*', $where = '', $opt = array())
 	{
-		$unviewable = static::getUnviewable('threads');
+		$dbTags = new DBTags;
+		$unviewable = $dbTags->getUnviewable('threads');
 
 		$opt = array_merge(array(
 			'limit' => '',
@@ -93,7 +94,8 @@ class DBTags
 		{
 			$select .= ', ';
 		}
-		$query = static::get($select.'COUNT(tags.id) as tagsCount', $where, array(
+		$dbTags = new DBTags;
+		$query = $dbTags->get($select.'COUNT(tags.id) as tagsCount', $where, array(
 			'groupBy' => ''
 		));
 
@@ -107,7 +109,8 @@ class DBTags
 		{
 			$select .= ', ';
 		}
-		$query = static::get($select.'COUNT(threads.tid) as threadsCount', $where, array(
+		$dbTags = new DBTags;
+		$query = $dbTags->get($select.'COUNT(threads.tid) as threadsCount', $where, array(
 			'groupBy' => ''
 		));
 
@@ -117,28 +120,32 @@ class DBTags
 	static function find($id)
 	{
 		global $db;
-		$query = static::get('*', 'tags.id = '.(int)$id);
+		$dbTags = new DBTags;
+		$query = $dbTags->get('*', 'tags.id = '.(int)$id);
 		return $db->fetch_array($query);
 	}
 
 	static function findByHash($hash)
 	{
 		global $db;
-		$query = static::get('*', "tags.hash = '".$db->escape_string($hash)."'");
+		$dbTags = new DBTags;
+		$query = $dbTags->get('*', "tags.hash = '".$db->escape_string($hash)."'");
 		return $db->fetch_array($query);
 	}
 
 	static function findByName($name)
 	{
 		global $db;
-		$query = static::get('*', "tags.name = '".$db->escape_string($name)."'");
+		$dbTags = new DBTags;
+		$query = $dbTags->get('*', "tags.name = '".$db->escape_string($name)."'");
 		return $db->fetch_array($query);
 	}
 
 	static function findByTid($tid)
 	{
 		global $db;
-		$query = static::get('*', 'tags.tid = '.(int)$tid);
+		$dbTags = new DBTags;
+		$query = $dbTags->get('*', 'tags.tid = '.(int)$tid);
 		return $db->fetch_array($query);
 	}
 }
