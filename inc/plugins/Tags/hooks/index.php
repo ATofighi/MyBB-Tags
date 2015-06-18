@@ -28,7 +28,7 @@ function tags_index_start()
 
 	$query = DBTags::get(
 		"SUM(threads.views) as sumviews, tags.name",
-		"threads.fid = '{$fid}'",
+		"tags.name != ''",
 		array(
 			'orderBy' => $order_by,
 			'orderType' => '',
