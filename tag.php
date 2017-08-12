@@ -49,7 +49,7 @@ if($mybb->get_input('action') == 'sitemap-index')
 	$bad_tags = tags_getbads(true);
 
 	$count = DBTags::count();
-	$pages = $count / 300;
+	$pages = $count / 300; // TODO: sitemap per page
 	$pages = ceil($pages);
 	$sitemaps = '';
 	for($i = 1; $i <= $pages; $i++)
@@ -62,12 +62,12 @@ EOT;
 	}
 
 	header('Content-type: text/xml');
-	echo <<<EOT
-<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	echo "
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
 {$sitemaps}
 </sitemapindex>
-EOT;
+";
 	exit;
 }
 elseif($mybb->get_input('action') == 'sitemap')
@@ -94,22 +94,22 @@ elseif($mybb->get_input('action') == 'sitemap')
 		$url = get_tag_link(urldecode(str_replace(',','-',$tag['name'])));
 		$lastmod = date('c', $tag['lastmod']);
 		$priority = min(round($tag['sumviews']/$maxviews, 2), 1);
-		$sitemaps .= <<<EOT
+		$sitemaps .= "
   <url>
     <loc>{$mybb->settings['bburl']}/{$url}</loc>
     <lastmod>{$lastmod}</lastmod>
     <priority>{$priority}</priority>
   </url>
-EOT;
+";
 	}
 
 	header('Content-type: text/xml');
-	echo <<<EOT
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	echo "
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
 {$sitemaps}
 </urlset>
-EOT;
+";
 	exit;
 }
 
@@ -117,17 +117,9 @@ $page = $mybb->get_input('page', 1);
 
 $name = $mybb->get_input('name');
 $name = $parser->parse_badwords($name);
-$name = tags_string2tag($name);
+//$name = tags_string2tag($name);
 $name = htmlspecialchars_uni($name);
 $url_name = urlencode(str_replace(',', '-', $name));
-$names = explode(',', $name);
-$hash = array();
-foreach($names as $n)
-{
-	array_push($hash, "'".md5($n)."'");
-}
-
-$hash = implode(', ', $hash);
 
 $mybb->settings['tags_per_page'] = (int)($mybb->settings['tags_per_page']);
 if($mybb->settings['tags_per_page'] <= 0 || $mybb->settings['tags_per_page'] >= 100)
@@ -153,7 +145,7 @@ if($name && $mybb->settings['tags_seo'] && $mybb->settings['tags_forceseo'] && t
 	exit;
 }
 
-if(!$name || !$hash)
+if(!$name)
 {
 
 	eval('$tag = "'.$templates->get('tags_search').'";');
@@ -165,7 +157,8 @@ else
 
 	$bad_tags = tags_getbads(true);
 
-	$count = DBTags::countThreads("tags.hash IN ({$hash})");
+	$count = DBTags::countThreads("tags.name = '".$db->escape_string($name)."'");
+
 	$pages = $count / $mybb->settings['tags_per_page'];
 	$pages = ceil($pages);
 
@@ -190,9 +183,9 @@ else
 
 	$query = DBTags::get(
 		"threads.tid, posts.message, posts.username, posts.uid, threads.subject, threads.views, threads.replies",
-		"tags.hash IN ({$hash})",
+		"tags.name = '".$db->escape_string($name)."'",
 		array(
-			'groupBy' => 'threads.tid',
+//			'groupBy' => 'threads.tid',
 			'limit' => "{$start}, {$mybb->settings['tags_per_page']}"
 		)
 	);

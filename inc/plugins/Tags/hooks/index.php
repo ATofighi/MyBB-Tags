@@ -16,8 +16,10 @@ function tags_index_start()
 		return;
 	}
 
+	// TODO: cache tags.
+
 	$lang->load('tags');
-	
+
 	$mybb->settings['tags_limit'] = (int)($mybb->settings['tags_limit']);
 
 	$order_by = 'RAND()';
@@ -28,7 +30,7 @@ function tags_index_start()
 
 	$query = DBTags::get(
 		"SUM(threads.views) as sumviews, tags.name",
-		"tags.name != ''",
+		"",
 		array(
 			'orderBy' => $order_by,
 			'orderType' => '',
@@ -53,6 +55,6 @@ function tags_index_start()
 
 	if($tags != '')
 	{
-	eval('$tags = "'.$templates->get('tags_box').'";');
+		eval('$tags = "'.$templates->get('tags_box').'";');
 	}
 }

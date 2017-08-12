@@ -12,46 +12,59 @@ function tags_thread(&$datahandler)
 {
 	global $mybb, $db;
 
-	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->thread_insert_data['fid']) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])) || !$mybb->get_input('tags'))
+	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->thread_insert_data['fid']) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
 	}
-	
+
 	$thread = $datahandler->data;
 	$tid = $datahandler->tid;
 
-	$tags_value = $mybb->get_input('tags');
-	$tags_value = tags_string2tag($tags_value);
-	$tags_hash_arr = array();
-	$tags = explode(',', $tags_value);
-	$subject = $thread['subject'];
-	$subject = tags_string2tag($subject);
-	$subject = explode(',', $subject);
+	$tags = $mybb->get_input('tags', MyBB::INPUT_ARRAY);
+	array_unique($tags);
 
-	$tags = array_merge($tags, $subject);
 
-	$tags_insert = array();
+	$oldTags = array();
+	$query = DBTags::get("*", "threads.tid = '{$tid}'");
+	while($tag = $db->fetch_array($query))
+	{
+		if($tag['name'])
+		{
+			$oldTags[] = $tag['name'];
+		}
+	}
+	array_unique($oldTags);
+
+	$tagsInsert = array();
+	$tagsRemove = array();
 	foreach($tags as $tag)
 	{
-		if($tag && !in_array(array(
-				'tid' => $tid,
-				'name' => $db->escape_string($tag),
-				'hash' => md5($tag)
-			), $tags_insert))
+		if($tag)
 		{
-			array_push($tags_insert, array(
-				'tid' => $tid,
-				'name' => $db->escape_string($tag),
-				'hash' => md5($tag)
-			));
+			if(!in_array($tag, $oldTags))
+				$tagsInsert[] = array(
+					'tid' => $tid,
+					'name' => $db->escape_string($tag),
+				);
+		}
+	}
+	foreach($oldTags as $tag)
+	{
+		if($tag)
+		{
+			if(!in_array($tag, $tags)) {
+				$tagsRemove[] = "'".$db->escape_string($tag)."'";
+			};
 		}
 	}
 
-
-	if(count($tags_insert) > 0)
+	if(count($tagsRemove) > 0) {
+		$tagsRemove = implode(',', $tagsRemove);
+		$db->delete_query("tags", "tid='{$tid}' and name IN ({$tagsRemove})");
+	}
+	if(count($tagsInsert) > 0)
 	{
-		$db->delete_query("tags", "tid='{$tid}'");
-		$db->insert_query_multiple("tags", $tags_insert);
+		$db->insert_query_multiple("tags", $tagsInsert);
 	}
 }
 
@@ -61,7 +74,7 @@ $plugins->add_hook("datahandler_post_validate_post", "tags_validate");
 function tags_validate(&$datahandler)
 {
 	global $mybb, $db, $thread, $lang;
-	
+
 	if($mybb->settings['tags_enabled'] == 0 || tags_in_disforum($datahandler->fid) || ($mybb->settings['tags_groups'] != -1 && !is_member($mybb->settings['tags_groups'])))
 	{
 		return;
@@ -70,11 +83,9 @@ function tags_validate(&$datahandler)
 	$lang->load('tags');
 	$mybb->settings['tags_max_thread'] = (int)$mybb->settings['tags_max_thread'];
 
-	if($mybb->get_input('tags') != '' && ($datahandler->action == 'thread' || (is_array($thread) && $datahandler->data['pid'] == $thread['firstpost'])))
+	if(count($mybb->get_input('tags', MyBB::INPUT_ARRAY)) > 0 && ($datahandler->action == 'thread' || (is_array($thread) && $datahandler->data['pid'] == $thread['firstpost'])))
 	{
-		$tags_value = $mybb->get_input('tags');
-		$tags_value = tags_string2tag($tags_value);
-		$tags = explode(',', $tags_value);
+		$tags = $mybb->get_input('tags', MyBB::INPUT_ARRAY);
 		if(count($tags) > $mybb->settings['tags_max_thread'] && $mybb->settings['tags_max_thread'] > 0)
 		{
 			$lang->many_tags = $lang->sprintf($lang->many_tags, $mybb->settings['tags_max_thread']);

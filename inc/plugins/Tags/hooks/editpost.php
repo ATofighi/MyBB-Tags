@@ -23,22 +23,32 @@ function tags_editpost_end()
 		return;
 	}
 
-	$tags_value = $mybb->get_input('tags');
-	if(!$tags_value)
+
+	$tags = $mybb->input['tags'];
+	if(!isset($tags))
 	{
 		$bad_tags = tags_getbads(true, false);
 		$query = $db->simple_select('tags', '*', "tid='{$thread['tid']}'{$bad_tags}");
 		$thread['tags'] = array();
 		while($tag = $db->fetch_array($query))
 		{
-			if(!in_array($tag['name'], $thread['tags']) && $tag['name'] != '')
-			{
-				array_push($thread['tags'], $tag['name']);
-			}
-		}		
-		$tags_value = implode(',',$thread['tags']);
+			$tags[] = $tag['name'];
+		}
 	}
-	$tags_value = htmlspecialchars_uni(tags_string2tag($tags_value));
+	$tags = (array)$tags;
+
+	$tagInputs = '';
+	$tagsData = array();
+	foreach($tags as $tag) {
+		$tagsData[] = array(
+			'id' => $tag,
+			'text' => $tag
+		);
+		$tag = htmlspecialchars_uni($tag);
+		eval('$tagInputs .= "'.$templates->get('tags_input_hidden').'";');
+	}
+	$tagsJson = json_encode($tags);
+	$tagsData = json_encode($tagsData);
 
 	eval('$tags = "'.$templates->get('tags_input').'";');
 }

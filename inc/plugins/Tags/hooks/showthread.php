@@ -30,6 +30,8 @@ function tags_showthread()
 			array_push($thread['tags'], $tag['name']);
 		}
 	}
+	/*
+	TODO: Tags creator
 	if($db->num_rows($query) == 0)
 	{
 		$subject = tags_string2tag($subject);
@@ -59,6 +61,7 @@ function tags_showthread()
 		}
 		$thread['tags'] = $tags;
 	}
+	*/
 
 
 	$tags = '';

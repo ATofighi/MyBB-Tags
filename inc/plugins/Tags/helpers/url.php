@@ -5,27 +5,6 @@ if(!defined("IN_MYBB"))
 	die("This file cannot be accessed directly.");
 }
 
-function tags_string2tag($s)
-{
-	global $mybb;
-
-	$s = my_strtolower($s);
-	$s = ltrim(rtrim(trim($s)));
-	$s = str_replace(array("`","~","!","@","#","$","%","^","&","*","(",")","_","+","-","=","\\","|","]","[","{","}",'"',"'",";",":","/","."," ",">","<"), ",", $s);
-	$s = ltrim(rtrim(trim($s, ','),','),',');
-	$s = preg_replace("#([,]+)#si", ',', $s);
-
-	// https://github.com/ATofighi/MyBB-Tags/issues/33
-	$mybb->settings['tags_charreplace'] = ltrim(rtrim(trim(str_replace(array("\r\n", "\r"),"\n", $mybb->settings['tags_charreplace']))));
-	$translations = explode("\n", $mybb->settings['tags_charreplace']);
-	foreach($translations as $translation)
-	{
-		$translation = explode('=>', $translation, 2);
-		$s = str_replace($translation[0], $translation[1], $s);
-	}
-
-	return $s;
-}
 
 function tags_current_url()
 {

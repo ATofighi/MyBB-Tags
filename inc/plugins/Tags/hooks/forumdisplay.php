@@ -18,6 +18,8 @@ function tags_forumdisplay_end()
 
 	$lang->load('tags');
 
+	// TODO: cache
+
 	$mybb->settings['tags_limit'] = (int)($mybb->settings['tags_limit']);
 
 	$order_by = 'RAND()';

@@ -5,25 +5,22 @@ if(!defined("IN_MYBB"))
 	die("This file cannot be accessed directly.");
 }
 
+
 function tags_getbads($and = true, $prefix = true)
 {
 	global $mybb;
 	$b = $mybb->settings['tags_bad'];
 	$b = str_replace(array("\r\n", "\n", "\r"), ',', $b);
-	$b = tags_string2tag($b);
 	$tags = explode(',', $b);
-	$tags_hash = array();
+	array_unique($tags);
+	$queryTags = array();
 	foreach($tags as $tag)
 	{
 		if($tag == '')
 		{
 			continue;
 		}
-
-		if($tag && !in_array("'".md5($tag)."'", $tags_hash))
-		{
-			array_push($tags_hash, "'".md5($tag)."'");
-		}
+		$queryTags[] = $db->escape_string($tag);
 	}
 	$r = '';
 	if($and)
@@ -34,8 +31,8 @@ function tags_getbads($and = true, $prefix = true)
 	{
 		$r .= 'tags.';
 	}
-	$r .= 'hash NOT IN ('.implode(', ', $tags_hash).')';
-	if(count($tags_hash))
+	$r .= 'name NOT IN ('.implode(', ', $queryTags).')';
+	if(count($queryTags))
 	{
 		return $r;
 	}

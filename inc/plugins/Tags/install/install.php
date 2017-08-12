@@ -5,32 +5,45 @@ function tags_install()
 
 	$db->delete_query('templates', "title LIKE 'tags\_%' AND sid='-1'");
 	$db->delete_query('settings', "name LIKE 'tags\_%'");
-	
+
 	$templatearray = array(
 		array(
 			"title" => 'tags_input',
 			"template" => $db->escape_string('<tr>
 	<td class="trow2" width="20%" valign="top"><strong>{$lang->tags}:</strong></td>
-	<td class="trow2"><input type="text" class="textbox" name="tags" size="40" maxlength="85" value="{$tags_value}" tabindex="2" id="tags" /></td>
+	<td class="trow2"><input type="hidden" id="tags"  />
+		<div id="tags-inputs">{$tagInputs}</div></td>
 </tr>
-<script src="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{$mybb->asset_url}/jscripts/tags/jquery.tagsinput.css" />
-<script type="text/javascript">
-	$("#tags").tagsInput({
-		\'height\': \'40px\',
-		\'width\': \'auto\',
-		\'defaultText\': \'{$lang->tags_placeholder}\',
-		\'minChars\': {$mybb->settings[\'tags_minchars\']},
-		\'maxChars\': {$mybb->settings[\'tags_maxchars\']},
-		\'delimiter\': [",", "`","~","!","@","#","$","%","^","&","*","(",")","_","+","-","=","\\\\","|","[","]","{","}",\'"\',"\'",";",":","/","."," ",">","<"]
-	});
+<link rel="stylesheet" href="{$mybb->asset_url}/jscripts/select2/select2.css?ver=1807">
+<script type="text/javascript" src="{$mybb->asset_url}/jscripts/select2/select2.min.js?ver=1806"></script>
 
-	$("#tags").on(\'change\', function()
-	{
-		$(this).importTags($(this).val());
-	});
+<script type="text/javascript">
+MyBB.select2();
+$("#tags").select2({
+		createSearchChoice:function(term, data) {
+			return {id:term, text:term}
+		},
+    multiple: true,
+	width: \'100%\',
+	data: {$tagsData},
+}).change(function(data){
+	$(\'#tags-inputs\').html(\'\');
+	for(val in data.val) {
+		var input = $(\'<input />\');
+		input.attr(\'type\', \'hidden\');
+		input.attr(\'name\', \'tags[]\');
+		input.val(data.val[val]);
+		$(\'#tags-inputs\').append(input);
+	}
+});
+$("#tags").select2(\'val\', {$tagsJson});
 </script>'),
 			"sid" => "-1"
+		),
+			array(
+				"title" => 'tags_input_hidden',
+				"template" => $db->escape_string('<input type="hidden" name="tags[]" value="{$tag}" />'),
+				"sid" => "-1"
 		),
 		array(
 			"title" => 'tags_box',
@@ -51,11 +64,11 @@ function tags_install()
 	color:#fff;
 	text-decoration:none;
 	-moz-border-radius-bottomright:4px;
-	-webkit-border-bottom-right-radius:4px;	
+	-webkit-border-bottom-right-radius:4px;
 	border-bottom-right-radius:4px;
 	-moz-border-radius-topright:4px;
-	-webkit-border-top-right-radius:4px;	
-	border-top-right-radius:4px;	
+	-webkit-border-top-right-radius:4px;
+	border-top-right-radius:4px;
 }
 
 .tag:link, .tag:hover, .tag:visited, .tag:active {
@@ -73,7 +86,7 @@ function tags_install()
 	height:0;
 	border-color:transparent #0089e0 transparent transparent;
 	border-style:solid;
-	border-width:12px 12px 12px 0;		
+	border-width:12px 12px 12px 0;
 }
 
 .tag:after{
@@ -306,17 +319,17 @@ function tags_install()
 
 	// create settings group
 	$insertarray = array(
-		'name' => 'tags', 
-		'title' => 'Tags Plugin', 
-		'description' => "Settings for Tags Plugin.", 
+		'name' => 'tags',
+		'title' => 'Tags Plugin',
+		'description' => "Settings for Tags Plugin.",
 		'disporder' => 100,
 		'isdefault' => 0
 	);
 	$gid = $db->insert_query("settinggroups", $insertarray);
-	
+
 	// Create our entries table
 	$collation = $db->build_create_table_collation();
-	
+
 	if(!$db->table_exists('tags'))
 	{
 		if($db->type == 'pgsql')
@@ -341,4 +354,3 @@ function tags_install()
 		}
 	}
 }
-

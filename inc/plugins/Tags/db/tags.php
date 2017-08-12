@@ -53,7 +53,7 @@ class DBTags
 			'limit' => '',
 			'orderBy' => '',
 			'orderType' => 'asc',
-			'groupBy' => 'tags.hash'
+			'groupBy' => 'tags.name'
 		), $opt);
 
 		if(!$where)
@@ -124,7 +124,7 @@ class DBTags
 		$query = $dbTags->get('*', 'tags.id = '.(int)$id);
 		return $db->fetch_array($query);
 	}
-
+/*
 	static function findByHash($hash)
 	{
 		global $db;
@@ -132,6 +132,7 @@ class DBTags
 		$query = $dbTags->get('*', "tags.hash = '".$db->escape_string($hash)."'");
 		return $db->fetch_array($query);
 	}
+	*/
 
 	static function findByName($name)
 	{
