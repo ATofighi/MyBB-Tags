@@ -7,16 +7,16 @@ if(!defined("IN_MYBB"))
 
 function tags_getsize($v)
 {
-	global $mybb, $db, $mybb_tags_my_maxviews;
-	if(!isset($mybb_tags_my_maxviews))
+	global $mybb, $db, $mybb_tags_my_maxcnt;
+	if(!isset($mybb_tags_my_maxcnt))
 	{
-		$query = $db->simple_select('threads', 'MAX(views) as maxviews', "", array("limit" => 1));
-		$maxviews = $db->fetch_field($query, 'maxviews');
-		$mybb_tags_my_maxviews = $maxviews;
+		$query = $db->simple_select('tags_slug', 'MAX(count) as maxcnt', "", array("limit" => 1));
+		$maxviews = $db->fetch_field($query, 'maxcnt');
+		$mybb_tags_my_maxcnt = $maxviews;
 	}
 	else
 	{
-		$maxviews = $mybb_tags_my_maxviews;
+		$maxviews = $mybb_tags_my_maxcnt;
 	}
 
 	if($v >= $maxviews)

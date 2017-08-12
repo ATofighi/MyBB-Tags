@@ -20,12 +20,23 @@ function tags_install()
 <script type="text/javascript">
 MyBB.select2();
 $("#tags").select2({
-		createSearchChoice:function(term, data) {
+	createSearchChoice:function(term, data) {
+		if($.trim(term)) {
 			return {id:term, text:term}
-		},
+		}
+	},
+	initSelection : function (element, callback) {
+		var vals = element.select2(\'val\');
+		var data = [];
+		for(var i in vals) {
+			var val = vals[i];
+			data.push({id: val, text: val});
+		}
+        callback(data);
+    },
     multiple: true,
 	width: \'100%\',
-	data: {$tagsData},
+	data: {$tagsData}
 }).change(function(data){
 	$(\'#tags-inputs\').html(\'\');
 	for(val in data.val) {
@@ -35,6 +46,25 @@ $("#tags").select2({
 		input.val(data.val[val]);
 		$(\'#tags-inputs\').append(input);
 	}
+});
+$(\'input[name=subject]\').blur(function(){
+	var txt = $(this).val();
+	txt = $.trim(txt.replace(/([ +"\'\\\\/\\]\\[,.-])/gi, \' \'));
+	var tags = txt.split(\' \');
+	var val = $(\'#tags\').select2(\'val\');
+	for(var i in tags) {
+		var tag = tags[i];
+		val.push(tag);
+	}
+	var data = [];
+	for(var i in val) {
+		var tag = val[i];
+		data.push({
+			id: tag,
+			text: tag
+		});
+	}
+	$(\'#tags\').select2(\'val\', val);
 });
 $("#tags").select2(\'val\', {$tagsJson});
 </script>'),
@@ -350,6 +380,30 @@ $("#tags").select2(\'val\', {$tagsJson});
 					`name` varchar(200)  NOT NULL default '',
 					`hash` varchar(200)  NOT NULL default '',
 					PRIMARY KEY  (`id`)
+				) ENGINE=MyISAM{$collation}");
+		}
+	}
+
+	if(!$db->table_exists('tags_slug'))
+	{
+		if($db->type == 'pgsql')
+		{
+			$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags_slug` (
+					`name` varchar(200)  NOT NULL default '',
+					`slug` varchar(200)  NOT NULL default '',
+					`count` int NOT NULL default '0',
+					UNIQUE KEY (`name`),
+					UNIQUE KEY (`slug`)
+				) ENGINE=MyISAM{$collation}");
+		}
+		else
+		{
+			$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags_slug` (
+					`name` varchar(200)  NOT NULL default '',
+					`slug` varchar(200)  NOT NULL default '',
+					`count` int(10) UNSIGNED NOT NULL default '0',
+					UNIQUE KEY (`name`),
+					UNIQUE KEY (`slug`)
 				) ENGINE=MyISAM{$collation}");
 		}
 	}

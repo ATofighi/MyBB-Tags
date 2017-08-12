@@ -29,7 +29,7 @@ function tags_index_start()
 	}
 
 	$query = DBTags::get(
-		"SUM(threads.views) as sumviews, tags.name",
+		"slugs.count, tags.name",
 		"",
 		array(
 			'orderBy' => $order_by,
@@ -48,7 +48,7 @@ function tags_index_start()
 		}
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
 		$tag['tag_link'] = get_tag_link($tag['name']);
-		$tag['size'] = tags_getsize($tag['sumviews']);
+		$tag['size'] = tags_getsize($tag['count']);
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
 		$comma = $lang->comma;
 	}

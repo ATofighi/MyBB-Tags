@@ -18,8 +18,20 @@ function tags_newthread_start()
 
 	$lang->load('tags');
 
-	$tags_value = $mybb->get_input('tags');
-	$tags_value = htmlspecialchars_uni(tags_string2tag($tags_value));
+	$tags = $mybb->get_input('tags', MyBB::INPUT_ARRAY);
+
+	$tagInputs = '';
+	$tagsData = array();
+	foreach($tags as $tag) {
+		$tagsData[] = array(
+			'id' => $tag,
+			'text' => $tag
+		);
+		$tag = htmlspecialchars_uni($tag);
+		eval('$tagInputs .= "'.$templates->get('tags_input_hidden').'";');
+	}
+	$tagsJson = json_encode($tags);
+	$tagsData = json_encode($tagsData);
 
 	eval('$tags = "'.$templates->get('tags_input').'";');
 }

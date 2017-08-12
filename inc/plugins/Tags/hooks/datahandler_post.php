@@ -37,15 +37,20 @@ function tags_thread(&$datahandler)
 
 	$tagsInsert = array();
 	$tagsRemove = array();
+	$tagsInsertNames = array();
+	$newTags = array();
 	foreach($tags as $tag)
 	{
 		if($tag)
 		{
-			if(!in_array($tag, $oldTags))
+			if(!in_array($tag, $oldTags)) {
 				$tagsInsert[] = array(
 					'tid' => $tid,
 					'name' => $db->escape_string($tag),
 				);
+				$newTags[] = $tag;
+				$tagsInsertNames[] = "'".$db->escape_string($tag)."'";
+			}
 		}
 	}
 	foreach($oldTags as $tag)
@@ -54,17 +59,42 @@ function tags_thread(&$datahandler)
 		{
 			if(!in_array($tag, $tags)) {
 				$tagsRemove[] = "'".$db->escape_string($tag)."'";
-			};
+			}
 		}
 	}
 
 	if(count($tagsRemove) > 0) {
 		$tagsRemove = implode(',', $tagsRemove);
 		$db->delete_query("tags", "tid='{$tid}' and name IN ({$tagsRemove})");
+		$db->query("UPDATE `".TABLE_PREFIX."tags_slug`
+					SET count = count - 1
+					WHERE name IN ({$tagsRemove})");
+		$db->delete_query("tags_slug", "count=0 and name IN ({$tagsRemove})");
 	}
 	if(count($tagsInsert) > 0)
 	{
+		$tagsInsertNames = implode(',', $tagsInsertNames);
+		$query = $db->simple_select('tags_slug', 'name', "name IN ({$tagsInsertNames})");
+		$slugs = array();
+		while($slug = $db->fetch_array($query)) {
+			$slugs[] = $slug['name'];
+		}
+		$newSlugs = array();
+		foreach($newTags as $tag) {
+			if(!in_array($tag, $slugs)) {
+				$newSlugs[] = $tag;
+			}
+		}
+
+		if(count($newSlugs) > 0) {
+			DBTags::newSlugs($newSlugs);
+		}
+
 		$db->insert_query_multiple("tags", $tagsInsert);
+
+		$db->query("UPDATE `".TABLE_PREFIX."tags_slug`
+					SET count = count + 1
+					WHERE name IN ({$tagsInsertNames})");
 	}
 }
 

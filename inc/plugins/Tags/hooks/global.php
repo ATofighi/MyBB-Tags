@@ -18,16 +18,16 @@ function tags_global_start()
 		}
 		else
 		{
-			define('TAG_URL', "tag-{name}.html");
+			define('TAG_URL', "tag-{slug}.html");
 		}
 		define('TAG_URL_PAGE', "tag.html");
 	}
 	else
 	{
-		define('TAG_URL', "tag.php?name={name}");
+		define('TAG_URL', "tag.php?slug={slug}");
 		define('TAG_URL_PAGE', "tag.php");
 	}
-	
+
 	if($mybb->settings['tags_disallowedforums'] == -1)
 	{
 		$mybb->settings['tags_enabled'] = 0;

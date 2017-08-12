@@ -116,10 +116,14 @@ elseif($mybb->get_input('action') == 'sitemap')
 $page = $mybb->get_input('page', 1);
 
 $name = $mybb->get_input('name');
+if(!$name && $mybb->get_input('slug')) {
+	$slug = $mybb->get_input('slug');
+	$name = DBTags::getNameBySlug($slug);
+}
+
 $name = $parser->parse_badwords($name);
-//$name = tags_string2tag($name);
 $name = htmlspecialchars_uni($name);
-$url_name = urlencode(str_replace(',', '-', $name));
+
 
 $mybb->settings['tags_per_page'] = (int)($mybb->settings['tags_per_page']);
 if($mybb->settings['tags_per_page'] <= 0 || $mybb->settings['tags_per_page'] >= 100)

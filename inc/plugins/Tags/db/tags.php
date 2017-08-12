@@ -46,6 +46,7 @@ class DBTags
 
 	static function get($select = '*', $where = '', $opt = array())
 	{
+		global $db;
 		$dbTags = new DBTags;
 		$unviewable = $dbTags->getUnviewable('threads');
 
@@ -63,6 +64,7 @@ class DBTags
 		$where = "({$where}) AND threads.tid != '0' AND threads.visible = '1' AND threads.closed NOT LIKE 'moved|%' AND {$unviewable}".tags_getbads();
 
 		$query = "SELECT {$select} FROM `".TABLE_PREFIX."tags` tags\n";
+		$query .= "LEFT JOIN `".TABLE_PREFIX."tags_slug` slugs on(tags.name = slugs.name)\n";
 		$query .= "LEFT JOIN `".TABLE_PREFIX."threads` threads on(tags.tid = threads.tid)\n";
 		$query .= "LEFT JOIN `".TABLE_PREFIX."posts` posts on(threads.firstpost = posts.pid)\n";
 		$query .= "WHERE ".$where."\n";
@@ -83,7 +85,7 @@ class DBTags
 			$query .= "limit {$opt['limit']}\n";
 		}
 
-		global $db;
+
 		return $db->query($query);
 	}
 
@@ -134,6 +136,15 @@ class DBTags
 	}
 	*/
 
+	static function getNameBySlug($slug)
+	{
+		global $db;
+		$query = $db->simple_select('tags_slug', 'name', "slug = '".$db->escape_string(urlencode($slug))."'");
+		$name = $db->fetch_field($query, 'name');
+		return $name;
+	}
+
+
 	static function findByName($name)
 	{
 		global $db;
@@ -148,5 +159,35 @@ class DBTags
 		$dbTags = new DBTags;
 		$query = $dbTags->get('*', 'tags.tid = '.(int)$tid);
 		return $db->fetch_array($query);
+	}
+
+	static function newSlugs($tags) {
+		global $db;
+		foreach($tags as $tag) {
+			$slug = tags_slug($tag);
+			$query = $db->simple_select('tags_slug', 'MAX(slug) as last',
+			 			"slug = '".$db->escape_string($slug)."'
+						or slug LIKE '".$db->escape_string($slug)."--%'");
+			$last = $db->fetch_field($query, 'last');
+			if(!$last) {
+				$insert = array(
+					'name' => $db->escape_string($tag),
+					'slug' => $db->escape_string($slug),
+					'count' => 0
+				);
+			}
+			else {
+				$last = str_replace($slug, '', $last);
+				$last = str_replace('--', '', $last);
+				$last = (int)$last;
+				$last++;
+				$insert = array(
+					'name' => $db->escape_string($tag),
+					'slug' => $db->escape_string($slug.'--'.$last),
+					'count' => 0
+				);
+			}
+			$db->insert_query('tags_slug', $insert);
+		}
 	}
 }

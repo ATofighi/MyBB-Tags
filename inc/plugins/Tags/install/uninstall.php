@@ -2,7 +2,7 @@
 function tags_uninstall()
 {
 	global $db, $mybb;
-	
+
 	$query = $db->simple_select('settinggroups', 'gid', "name='tags'");
 	$gid = $db->fetch_field($query, 'gid');
 
@@ -10,12 +10,13 @@ function tags_uninstall()
 	$db->delete_query("settinggroups", "name = 'tags'");
 
 	$db->delete_query('settings', "gid = '{$gid}'");
-	
+
 	if($mybb->settings['tags_droptable'])
 	{
 		$db->drop_table('tags');
+		$db->drop_table('tags_slug');
 	}
-	
+
 	rebuild_settings();
 
 }

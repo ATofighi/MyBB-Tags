@@ -22,13 +22,10 @@ function tags_showthread()
 	$tid = $thread['tid'];
 	$thread['tags'] = array();
 
-	$query = DBTags::get("*", "threads.tid = '{$tid}'");
+	$query = DBTags::get("tags.name, slugs.slug", "threads.tid = '{$tid}'");
 	while($tag = $db->fetch_array($query))
 	{
-		if($tag['name'] && !in_array($tag['name'], $thread['tags']))
-		{
-			array_push($thread['tags'], $tag['name']);
-		}
+		$thread['tags'][] = $tag;
 	}
 	/*
 	TODO: Tags creator
@@ -67,13 +64,10 @@ function tags_showthread()
 	$tags = '';
 	$comma = '';
 	$i = 0;
-	foreach($thread['tags'] as $tag)
+	foreach($thread['tags'] as $tagData)
 	{
-		if($tag == '' || $i >= 25)
-			continue;
-
-		$tag = htmlspecialchars_uni($tag);
-		$tag_link = get_tag_link($tag);
+		$tag = htmlspecialchars_uni($tagData['name']);
+		$tag_link = get_tag_link($tagData['slug']);
 		eval('$tags .= "'.$templates->get('tags_box_tag').'";');
 		$comma = $lang->comma;
 		$i++;
