@@ -51,8 +51,8 @@ For example if you want replace "a" to "b" and "c" to "d" use this code:<br />
 a=>b
 c=>d
 </pre>';
-$l['settings_tags_disallowedforums'] = 'Disallowed forums';
-$l['settings_tags_disallowedforums_desc'] = 'Please select the forums you want "Tags" don\'t work on these.';
+$l['setting_tags_disallowedforums'] = 'Disallowed forums';
+$l['setting_tags_disallowedforums_desc'] = 'Please select the forums you want "Tags" don\'t work on these.';
 $l['setting_tags_forceseo'] = 'Force users to use seo URLs?';
 $l['setting_tags_forceseo_desc'] = 'Do you want to force users to use SEO URLs (ex: tag-***.html) for tags?';
 $l['setting_tags_urlscheme'] = 'Tags URL scheme';
