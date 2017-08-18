@@ -15,7 +15,7 @@ if(!defined("IN_MYBB"))
 }
 
 define('TAGS_ROOT', MYBB_ROOT.'/inc/plugins/Tags');
-	
+define('TAGS_LAST_REVERSION', 3);	
 
 if(defined('THIS_SCRIPT') && in_array(THIS_SCRIPT, array('tag.php', 'showthread.php', 'index.php', 'forumdisplay.php')))
 {

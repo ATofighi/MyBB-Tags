@@ -19,11 +19,13 @@ require_once TAGS_ROOT.'/helpers/getbads.php';
 require_once TAGS_ROOT.'/helpers/getsize.php';
 require_once TAGS_ROOT.'/helpers/settings.php';
 require_once TAGS_ROOT.'/helpers/url.php';
+require_once TAGS_ROOT.'/helpers/db.php';
 
 // Database:
 require_once TAGS_ROOT.'/db/tags.php';
+require_once TAGS_ROOT.'/db/slugs.php';
 
-// Install:
+// Install/Uninstall:
 require_once TAGS_ROOT.'/install/active.php';
 require_once TAGS_ROOT.'/install/deactive.php';
 require_once TAGS_ROOT.'/install/install.php';

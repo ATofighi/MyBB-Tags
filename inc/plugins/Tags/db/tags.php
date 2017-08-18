@@ -54,7 +54,7 @@ class DBTags
 			'limit' => '',
 			'orderBy' => '',
 			'orderType' => 'asc',
-			'groupBy' => 'tags.name'
+			'groupBy' => 'tags.id, tags.name'
 		), $opt);
 
 		if(!$where)
@@ -126,15 +126,6 @@ class DBTags
 		$query = $dbTags->get('*', 'tags.id = '.(int)$id);
 		return $db->fetch_array($query);
 	}
-/*
-	static function findByHash($hash)
-	{
-		global $db;
-		$dbTags = new DBTags;
-		$query = $dbTags->get('*', "tags.hash = '".$db->escape_string($hash)."'");
-		return $db->fetch_array($query);
-	}
-	*/
 
 	static function getNameBySlug($slug)
 	{
@@ -150,44 +141,26 @@ class DBTags
 		global $db;
 		$dbTags = new DBTags;
 		$query = $dbTags->get('*', "tags.name = '".$db->escape_string($name)."'");
-		return $db->fetch_array($query);
+		return $query;
 	}
 
 	static function findByTid($tid)
 	{
 		global $db;
 		$dbTags = new DBTags;
-		$query = $dbTags->get('*', 'tags.tid = '.(int)$tid);
-		return $db->fetch_array($query);
+		$query = $dbTags->get('*', 'threads.tid = '.(int)$tid);
+		return $query;
 	}
 
-	static function newSlugs($tags) {
+	static function insert($tid, $tags) {
 		global $db;
+		$insert = array();
 		foreach($tags as $tag) {
-			$slug = tags_slug($tag);
-			$query = $db->simple_select('tags_slug', 'MAX(slug) as last',
-			 			"slug = '".$db->escape_string($slug)."'
-						or slug LIKE '".$db->escape_string($slug)."--%'");
-			$last = $db->fetch_field($query, 'last');
-			if(!$last) {
-				$insert = array(
-					'name' => $db->escape_string($tag),
-					'slug' => $db->escape_string($slug),
-					'count' => 0
-				);
-			}
-			else {
-				$last = str_replace($slug, '', $last);
-				$last = str_replace('--', '', $last);
-				$last = (int)$last;
-				$last++;
-				$insert = array(
-					'name' => $db->escape_string($tag),
-					'slug' => $db->escape_string($slug.'--'.$last),
-					'count' => 0
-				);
-			}
-			$db->insert_query('tags_slug', $insert);
+			$insert[] = array(
+				'name' => $tag,
+				'tid' => $tid
+			);
 		}
+		$db->insert_query_multiple("tags", $insert);
 	}
 }

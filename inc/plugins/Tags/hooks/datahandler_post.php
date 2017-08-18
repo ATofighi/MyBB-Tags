@@ -25,7 +25,7 @@ function tags_thread(&$datahandler)
 
 
 	$oldTags = array();
-	$query = DBTags::get("*", "threads.tid = '{$tid}'");
+	$query = DBTags::findByTid($tid);
 	while($tag = $db->fetch_array($query))
 	{
 		if($tag['name'])
@@ -37,19 +37,12 @@ function tags_thread(&$datahandler)
 
 	$tagsInsert = array();
 	$tagsRemove = array();
-	$tagsInsertNames = array();
-	$newTags = array();
 	foreach($tags as $tag)
 	{
 		if($tag)
 		{
 			if(!in_array($tag, $oldTags)) {
-				$tagsInsert[] = array(
-					'tid' => $tid,
-					'name' => $db->escape_string($tag),
-				);
-				$newTags[] = $tag;
-				$tagsInsertNames[] = "'".$db->escape_string($tag)."'";
+				$tagsInsert[] = $tag;
 			}
 		}
 	}
@@ -58,43 +51,42 @@ function tags_thread(&$datahandler)
 		if($tag)
 		{
 			if(!in_array($tag, $tags)) {
-				$tagsRemove[] = "'".$db->escape_string($tag)."'";
+				$tagsRemove[] = $tag;
 			}
 		}
 	}
 
+	array_unique($tagsInsert);
+	array_unique($tagsRemove);
+
 	if(count($tagsRemove) > 0) {
-		$tagsRemove = implode(',', $tagsRemove);
-		$db->delete_query("tags", "tid='{$tid}' and name IN ({$tagsRemove})");
-		$db->query("UPDATE `".TABLE_PREFIX."tags_slug`
-					SET count = count - 1
-					WHERE name IN ({$tagsRemove})");
-		$db->delete_query("tags_slug", "count=0 and name IN ({$tagsRemove})");
+		$db->delete_query("tags", "tid='{$tid}' and name IN (".tags_in_query($tagsRemove).")");
+
+		DBTagsSlug::minusMinus($tagsRemove);
+
+		DBTagsSlug::removeEmpties();
 	}
 	if(count($tagsInsert) > 0)
 	{
-		$tagsInsertNames = implode(',', $tagsInsertNames);
-		$query = $db->simple_select('tags_slug', 'name', "name IN ({$tagsInsertNames})");
+		$query = $db->simple_select('tags_slug', 'name', "name IN (".tags_in_query($tagsInsert).")");
 		$slugs = array();
 		while($slug = $db->fetch_array($query)) {
 			$slugs[] = $slug['name'];
 		}
 		$newSlugs = array();
-		foreach($newTags as $tag) {
+		foreach($tagsInsert as $tag) {
 			if(!in_array($tag, $slugs)) {
 				$newSlugs[] = $tag;
 			}
 		}
 
 		if(count($newSlugs) > 0) {
-			DBTags::newSlugs($newSlugs);
+			DBTagsSlug::newSlugs($newSlugs);
 		}
 
-		$db->insert_query_multiple("tags", $tagsInsert);
+		DBTags::insert($tid, $tagsInsert);
 
-		$db->query("UPDATE `".TABLE_PREFIX."tags_slug`
-					SET count = count + 1
-					WHERE name IN ({$tagsInsertNames})");
+		DBTagsSlug::plusPlus($tagsInsert);
 	}
 }
 

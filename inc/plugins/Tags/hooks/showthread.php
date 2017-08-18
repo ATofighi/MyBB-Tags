@@ -64,6 +64,7 @@ function tags_showthread()
 	$tags = '';
 	$comma = '';
 	$i = 0;
+	
 	foreach($thread['tags'] as $tagData)
 	{
 		$tag = htmlspecialchars_uni($tagData['name']);

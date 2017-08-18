@@ -17,6 +17,7 @@ $templatelist = "";
 require_once './global.php';
 require_once MYBB_ROOT.'inc/functions_forumlist.php';
 require_once MYBB_ROOT.'inc/class_parser.php';
+require_once MYBB_ROOT.'inc/plugins/Tags/upgrade.php';
 $parser = new postParser;
 $parser_options = array();
 $parser_options['allow_html'] = 0;
@@ -29,6 +30,116 @@ $parser_options['filter_badwords'] = 1;
 
 $lang->load('tags');
 
+if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
+	if($mybb->get_input('action2') == 'upgrade') {
+		$from = $mybb->get_input('from', MyBB::INPUT_INT);
+		if(!$from) {
+			$from = 1; // TODO: select version
+		}
+		header("location: tag.php?action=admin&action2=upgrade_proccess&step={$from}&start=0");
+	}
+	elseif($mybb->get_input('action2') == 'upgrade_proccess') {
+		@set_time_limit(300);
+		echo '<h1>Tags Upgrade:</h1>';
+		@ob_flush();
+		@flush();
+		$func = 'tags_upgrade_'.$mybb->get_input('step', MyBB::INPUT_INT);
+		$start = $mybb->get_input('start', MyBB::INPUT_INT);
+		if($start < 0) {
+			$start = 0;
+		}
+		if(function_exists($func)) {
+			list($limit, $remaining) = $func($start);
+			if($remaining) {
+				$next = $lower + $limit;
+				echo '<script src="jscripts/jquery.js"></script>';
+				echo "<form method=\"post\"><input type=\"hidden\" name=\"ipstart\" value=\"$next\" /><input type=\"submit\" class=\"submit_button\">";
+				echo "<script type=\"text/javascript\">$(document).ready(function() { var button = $('.submit_button'); if(button) { button.val('Automatically Redirecting...'); button.prop('disabled', true); button.css('color', '#aaa'); button.css('border-color', '#aaa'); document.forms[0].submit(); } });</script>";
+				@ob_flush();
+				@flush();
+			}
+			else {
+				$next = $mybb->get_input('step', MyBB::INPUT_INT) + 1;
+				if($next < TAGS_LAST_REVERSION) {
+					echo "<a href=\"tag.php?action=admin&action2=upgrade_proccess&step={$next}&start=0\">Next Step</a>";
+				}
+				else {
+					echo '<a href="index.php">Back to site.</a>';
+				}
+			}
+		}
+		else {
+			echo 'Upgrade is not avalible.';
+		}
+	}
+	elseif($mybb->get_input('action2') == 'make_tags') {
+		@set_time_limit(300);
+		echo '<h1>Create Tags:</h1>';
+		@ob_flush();
+		@flush();
+		$start = $mybb->get_input('start', MyBB::INPUT_INT);
+		if($start < 0) {
+			$start = 0;
+		}
+
+		$limit = 5000;
+	    $upper = $lower + $limit;
+
+	    $query = $db->simple_select('threads', 'COUNT(tid) as cnt');
+	    $cnt = $db->fetch_array($query);
+	    if($upper > $cnt['cnt'])
+	    {
+	    	$upper = $cnt['cnt'];
+	    }
+
+	    $remaining = $upper-$cnt['cnt'];
+
+	    echo "<p>Inserting Tags {$lower} to {$upper} ({$cnt['cnt']} Total)</p>";
+	    @ob_flush();
+	    @flush();
+
+	    $query = $db->simple_select("threads", "tid, subject", "", array('limit_start' => $lower, 'limit' => $limit));
+
+	    $tags = array();
+		$insert = array();
+
+	    while($row = $db->fetch_array($query)) {
+	    	$subject = $row['subject'];
+			$newTags = preg_replace("#([".preg_quote("+,./-%")."]+)#is", " ", $subject);
+			$newTags = trim($newTags);
+			$newTags = explode(' ', $newTags);
+			foreach($newTags as $tag) {
+				if($tag) {
+					$tags[] = $tag;
+					$insert[] = array(
+						'tid' => $row['tid'],
+						'name' => $tag
+					);
+				}
+			}
+	    }
+
+		array_unique($tags);
+
+		$db->insert_query_multiple('tags', $insert);
+
+	    DBTagsSlug::newSlugs($tags);
+
+	    echo "<p>Done.</p>";
+
+
+		if($remaining) {
+			$next = $lower + $limit;
+			echo '<script src="jscripts/jquery.js"></script>';
+			echo "<form method=\"post\"><input type=\"hidden\" name=\"ipstart\" value=\"$next\" /><input type=\"submit\" class=\"submit_button\">";
+			echo "<script type=\"text/javascript\">$(document).ready(function() { var button = $('.submit_button'); if(button) { button.val('Automatically Redirecting...'); button.prop('disabled', true); button.css('color', '#aaa'); button.css('border-color', '#aaa'); document.forms[0].submit(); } });</script>";
+			@ob_flush();
+			@flush();
+		}
+	}
+
+	exit;
+}
 
 if($mybb->settings['tags_enabled'] == 0)
 {
