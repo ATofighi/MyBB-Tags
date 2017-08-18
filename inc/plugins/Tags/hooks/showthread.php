@@ -27,46 +27,17 @@ function tags_showthread()
 	{
 		$thread['tags'][] = $tag;
 	}
-	/*
-	TODO: Tags creator
-	if($db->num_rows($query) == 0)
-	{
-		$subject = tags_string2tag($subject);
-		$tags = explode(',', $subject);
-
-		$tags_insert = array();
-		foreach($tags as $tag)
-		{
-			if($tag && !in_array(array(
-					'tid' => $tid,
-					'name' => $db->escape_string($tag),
-					'hash' => md5($tag)
-				), $tags_insert))
-			{
-				array_push($tags_insert, array(
-					'tid' => $tid,
-					'name' => $db->escape_string($tag),
-					'hash' => md5($tag)
-				));
-			}
-		}
-
-		if(count($tags_insert) > 0)
-		{
-			$db->delete_query("tags", "tid={$tid}");
-			$db->insert_query_multiple("tags", $tags_insert);
-		}
-		$thread['tags'] = $tags;
-	}
-	*/
-
+	sort($thread['tags']);
 
 	$tags = '';
 	$comma = '';
 	$i = 0;
-	
+	$oldTag = array();
 	foreach($thread['tags'] as $tagData)
 	{
+		if($tagData == $oldTag) // unique
+			continue;
+		$oldTag = $tagData;
 		$tag = htmlspecialchars_uni($tagData['name']);
 		$tag_link = get_tag_link($tagData['slug']);
 		eval('$tags .= "'.$templates->get('tags_box_tag').'";');

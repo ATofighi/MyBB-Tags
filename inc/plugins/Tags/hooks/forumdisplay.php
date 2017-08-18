@@ -33,6 +33,7 @@ function tags_forumdisplay_end()
 		"threads.fid = '{$fid}'",
 		array(
 			'orderBy' => $order_by,
+			'groupBy' => 'slugs.name',
 			'orderType' => '',
 			'limit' => "0, {$mybb->settings['tags_limit']}"
 		)
@@ -47,7 +48,7 @@ function tags_forumdisplay_end()
 		}
 
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
-		$tag['tag_link'] = get_tag_link($tag['name']);
+		$tag['tag_link'] = get_tag_link($tag['slug']);
 		$tag['size'] = tags_getsize($tag['count']);
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
 		$comma = ', ';

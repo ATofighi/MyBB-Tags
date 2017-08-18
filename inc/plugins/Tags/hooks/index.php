@@ -28,8 +28,8 @@ function tags_index_start()
 		$order_by = 'RANDOM()';
 	}
 
-	$query = DBTags::get(
-		"slugs.count, tags.name",
+	$query = DBTagsSlug::get(
+		"*",
 		"",
 		array(
 			'orderBy' => $order_by,
@@ -42,12 +42,8 @@ function tags_index_start()
 
 	while($tag = $db->fetch_array($query))
 	{
-		if(!$tag['name'])
-		{
-			continue;
-		}
 		$tag['name'] = htmlspecialchars_uni($tag['name']);
-		$tag['tag_link'] = get_tag_link($tag['name']);
+		$tag['tag_link'] = get_tag_link($tag['slug']);
 		$tag['size'] = tags_getsize($tag['count']);
 		eval('$tags .= "'.$templates->get('tags_box_tag_sized').'";');
 		$comma = $lang->comma;

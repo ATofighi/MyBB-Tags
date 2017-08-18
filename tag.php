@@ -137,6 +137,11 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 			@flush();
 		}
 	}
+	elseif($mybb->get_input('action2') == 'remove_empties') {
+		$db->delete_query('tags', "name = ''");
+		$db->delete_query('tags_slug', "name = ''");
+		echo 'Done.';
+	}
 
 	exit;
 }
