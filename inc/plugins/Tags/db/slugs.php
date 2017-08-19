@@ -10,7 +10,7 @@ class DBTagsSlug
 	static function get($select = '*', $where = '', $opt = array())
 	{
 		global $db;
-		$unviewable = $dbTags->getUnviewable('threads');
+		$unviewable = DBTags::getUnviewable('threads');;
 
 		$opt = array_merge(array(
 			'limit' => '',
