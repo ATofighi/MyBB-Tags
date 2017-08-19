@@ -113,7 +113,7 @@ class DBTags
 		}
 		$dbTags = new DBTags;
 		$query = $dbTags->get($select.'COUNT(threads.tid) as threadsCount', $where, array(
-			'groupBy' => ''
+			'groupBy' => 'threads.tid'
 		));
 
 		return $db->fetch_field($query, 'threadsCount');

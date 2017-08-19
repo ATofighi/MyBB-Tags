@@ -10,7 +10,8 @@ class DBTagsSlug
 	static function get($select = '*', $where = '', $opt = array())
 	{
 		global $db;
-		$dbTags = new DBTags;
+		$unviewable = $dbTags->getUnviewable('threads');
+
 		$opt = array_merge(array(
 			'limit' => '',
 			'orderBy' => '',
@@ -22,7 +23,11 @@ class DBTagsSlug
 			$where = '1=1';
 		}
 
+		$where = "({$where}) AND threads.tid != '0' AND threads.visible = '1' AND threads.closed NOT LIKE 'moved|%' AND {$unviewable}".tags_getbads();
+
 		$query = "SELECT {$select} FROM `".TABLE_PREFIX."tags_slug` slugs\n";
+		$query .= "LEFT JOIN `".TABLE_PREFIX."tags` tags on(tags.name = slugs.name)\n";
+		$query .= "LEFT JOIN `".TABLE_PREFIX."threads` threads on(tags.tid = threads.tid)\n";
 		$query .= "WHERE ".$where."\n";
 
 		if($opt['groupBy'])
