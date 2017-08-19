@@ -53,7 +53,7 @@ class DBTagsSlug
 			$select .= ', ';
 		}
 		$dbTags = new DBTagsSlug;
-		$query = $dbTags->get($select.'COUNT(slugs.id) as slugsCount', $where, array(
+		$query = $dbTags->get($select.'COUNT(slugs.slug) as slugsCount', $where, array(
 			'groupBy' => ''
 		));
 

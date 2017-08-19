@@ -142,6 +142,68 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 		$db->delete_query('tags_slug', "name = ''");
 		echo 'Done.';
 	}
+	elseif($mybb->get_input('action2') == 'recount') {// TODO: move to admincp
+		@set_time_limit(300);
+		echo '<h1>Recount Tags:</h1>';
+		@ob_flush();
+		@flush();
+		$start = $mybb->get_input('start', MyBB::INPUT_INT);
+		if($start < 0) {
+			$start = 0;
+		}
+
+		$limit = 5000;
+	    $upper = $lower + $limit;
+
+	    $query = $db->simple_select('tags_slug', 'COUNT(slug) as cnt');
+	    $cnt = $db->fetch_array($query);
+	    if($upper > $cnt['cnt'])
+	    {
+	    	$upper = $cnt['cnt'];
+	    }
+
+	    $remaining = $upper-$cnt['cnt'];
+
+	    echo "<p>Fix Tags Count {$lower} to {$upper} ({$cnt['cnt']} Total)</p>";
+	    @ob_flush();
+	    @flush();
+
+	    $query = $db->simple_select("tags_slug", "*", "", array('limit_start' => $lower, 'limit' => $limit));
+
+	    $names = array();
+		$count = array();
+
+	    while($row = $db->fetch_array($query)) {
+			$names[] = $row['name'];
+			$count[$row['name']] = 0;
+	    }
+
+		$query = $db->simple_select("tags", "*", "name IN (".tags_in_query($names).")");
+
+		while($row = $db->fetch_array($query)) {
+			$count[$row['name']]++;
+		}
+
+
+		foreach($count as $name => $val) {
+			$db->update_query("tags_slug", array("count" => (int)$val),
+			 	"name='".$db->escape_string($name)."'");
+		}
+
+
+	    echo "<p>Done.</p>";
+
+
+		if($remaining) {
+			$next = $lower + $limit;
+			echo '<script src="jscripts/jquery.js"></script>';
+			echo "<form method=\"post\"><input type=\"hidden\" name=\"ipstart\" value=\"$next\" /><input type=\"submit\" class=\"submit_button\">";
+			echo "<script type=\"text/javascript\">$(document).ready(function() { var button = $('.submit_button'); if(button) { button.val('Automatically Redirecting...'); button.prop('disabled', true); button.css('color', '#aaa'); button.css('border-color', '#aaa'); document.forms[0].submit(); } });</script>";
+			@ob_flush();
+			@flush();
+		}
+
+	}
 
 	exit;
 }
@@ -164,7 +226,7 @@ if($mybb->get_input('action') == 'sitemap-index')
 {
 	$bad_tags = tags_getbads(true);
 
-	$count = DBTags::count();
+	$count = DBTagsSlug::count();
 	$pages = $count / 300; // TODO: sitemap per page
 	$pages = ceil($pages);
 	$sitemaps = '';
@@ -178,8 +240,7 @@ EOT;
 	}
 
 	header('Content-type: text/xml');
-	echo "
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
 {$sitemaps}
 </sitemapindex>
@@ -188,18 +249,16 @@ EOT;
 }
 elseif($mybb->get_input('action') == 'sitemap')
 {
-	$query = $db->simple_select('threads', 'MAX(views) as maxviews', "", array("limit" => 1));
-	$maxviews = $db->fetch_field($query, 'maxviews');
-	$page = $mybb->get_input('page', 1);
+	$query = $db->simple_select('tags_slug', 'MAX(count) as maxcount', "", array("limit" => 1));
+	$maxCount = $db->fetch_field($query, 'maxcount');
+	$page = $mybb->get_input('page', MyBB::INPUT_INT);
 	if($page < 1)
 		$page = 1;
 
 	$start = ($page-1) * 300;
 
-	$bad_tags = tags_getbads(true);
-
-	$query = DBTags::get("MAX(threads.dateline) as lastmod, SUM(views) as sumviews, tags.*", '', array(
-		'orderBy' => 'sumviews',
+	$query = DBTagsSlug::get("*", '', array(
+		'orderBy' => 'count',
 		'orderType' => 'DESC',
 		'limit' => "{$start}, 300"
 	));
@@ -207,21 +266,18 @@ elseif($mybb->get_input('action') == 'sitemap')
 	$sitemaps = '';
 	while($tag = $db->fetch_array($query))
 	{
-		$url = get_tag_link(urldecode(str_replace(',','-',$tag['name'])));
-		$lastmod = date('c', $tag['lastmod']);
-		$priority = min(round($tag['sumviews']/$maxviews, 2), 1);
+		$url = get_tag_link($tag['slug']);
+		$priority = min(round($tag['count']/$maxCount, 2), 1);
 		$sitemaps .= "
   <url>
     <loc>{$mybb->settings['bburl']}/{$url}</loc>
-    <lastmod>{$lastmod}</lastmod>
     <priority>{$priority}</priority>
   </url>
 ";
 	}
 
 	header('Content-type: text/xml');
-	echo "
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
 {$sitemaps}
 </urlset>
