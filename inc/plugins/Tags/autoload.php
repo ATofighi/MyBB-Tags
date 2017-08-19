@@ -35,6 +35,7 @@ require_once TAGS_ROOT.'/install/uninstall.php';
 //Hooks:
 require_once TAGS_ROOT.'/hooks/global.php';
 require_once TAGS_ROOT.'/hooks/index.php';
+require_once TAGS_ROOT.'/hooks/portal.php';
 require_once TAGS_ROOT.'/hooks/newthread.php';
 require_once TAGS_ROOT.'/hooks/editpost.php';
 require_once TAGS_ROOT.'/hooks/showthread.php';

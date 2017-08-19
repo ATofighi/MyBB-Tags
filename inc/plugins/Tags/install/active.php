@@ -118,6 +118,15 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"gid"			=> $gid
 		),
 		array(
+			"name"			=> "tags_portal",
+			"title"			=> $db->escape_string('Show tags in "Portal" Page?'),
+			"description"	=> $db->escape_string('Do you want tags shown in "Portal" Page?'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_portal", 1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
 			"name"			=> "tags_max_thread",
 			"title"			=> $db->escape_string('Maximun tags for a thread'),
 			"description"	=> $db->escape_string('Please enter the maximum number of tags for threads. Set it to 0 for unlimited.'),
@@ -195,9 +204,13 @@ c=>d
 	find_replace_templatesets('newthread', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('editpost', '#'.preg_quote('{$posticons}').'#', '{$tags}{$posticons}');
 	find_replace_templatesets('showthread', '#'.preg_quote('{$ratethread}').'#', '{$ratethread}{$tags}');
-	find_replace_templatesets('showthread', '#'.preg_quote('{$headerinclude}').'#', '<meta name="keywords" content="{$thread[\'tags_meta\']}" />{$headerinclude}');
+	find_replace_templatesets('portal', '#'.preg_quote('{$latestthreads}').'#', '{$latestthreads}{$tags}');
 	find_replace_templatesets('index', '#'.preg_quote('{$forums}').'#', '{$forums}{$tags}');
 	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$threadslist}').'#', '{$threadslist}{$tags}');
+
+	find_replace_templatesets('showthread', '#'.preg_quote('{$headerinclude}').'#', '<meta name="keywords" content="{$thread[\'tags_meta\']}" />{$headerinclude}');
+
 	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('<div class="author smalltext">{$thread[\'profilelink\']}</div>').'#', '<div class="author smalltext">{$thread[\'profilelink\']}</div>{$thread[\'tags\']}');
+
 	find_replace_templatesets('headerinclude', '#'.preg_quote('{$stylesheets}').'#', '{$stylesheets}{$tags_css}');
 }
