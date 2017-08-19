@@ -204,6 +204,7 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 		}
 
 	}
+	// TODO: remove duplicated tags.
 
 	exit;
 }
@@ -361,7 +362,7 @@ else
 		"threads.tid, posts.message, posts.username, posts.uid, threads.subject, threads.views, threads.replies",
 		"tags.name = '".$db->escape_string($name)."'",
 		array(
-//			'groupBy' => 'threads.tid',
+			'groupBy' => 'threads.tid',
 			'limit' => "{$start}, {$mybb->settings['tags_per_page']}"
 		)
 	);
