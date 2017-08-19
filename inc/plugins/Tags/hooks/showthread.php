@@ -22,7 +22,12 @@ function tags_showthread()
 	$tid = $thread['tid'];
 	$thread['tags'] = array();
 
-	$query = DBTags::get("tags.name, slugs.slug", "threads.tid = '{$tid}'");
+	$query = DBTags::get("tags.name, slugs.slug",
+						 "threads.tid = '{$tid}'",
+						 array(
+				 			'groupBy' => 'slugs.slug'
+						)
+					);
 	while($tag = $db->fetch_array($query))
 	{
 		$thread['tags'][] = $tag;
@@ -32,11 +37,8 @@ function tags_showthread()
 	$tags = '';
 	$comma = '';
 	$i = 0;
-	$oldTag = array();
 	foreach($thread['tags'] as $tagData)
 	{
-		if($tagData == $oldTag) // unique
-			continue;
 		$oldTag = $tagData;
 		$tag = htmlspecialchars_uni($tagData['name']);
 		$tag_link = get_tag_link($tagData['slug']);
