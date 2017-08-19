@@ -156,7 +156,7 @@ class DBTags
 		$insert = array();
 		foreach($tags as $tag) {
 			$insert[] = array(
-				'name' => $tag,
+				'name' => $db->escape_string($tag),
 				'tid' => $tid
 			);
 		}

@@ -76,9 +76,8 @@ $("#tags").select2(\'val\', {$tagsJson});
 				"sid" => "-1"
 		),
 		array(
-			"title" => 'tags_box',
-			"template" => $db->escape_string('<br class="clear" />
-<style type="text/css">
+			"title" => 'tags_css',
+			"template" => $db->escape_string('<style type="text/css">
 .tag {
 	display: inline-block;
 	vertical-align: middle;
@@ -210,7 +209,24 @@ $("#tags").select2(\'val\', {$tagsJson});
 	border-width: 8px;
 	border-left-width:0;
 }
+.tag.tag-h7 {
+	font-size: 8px;
+	height: 14px;
+	margin-left:7px
+	line-height: 1.7;
+}
+
+.tag.tag-h7:before {
+	border-width: 7px;
+	border-left-width:0;
+}
 </style>
+'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_box',
+			"template" => $db->escape_string('<br class="clear" />
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder tfixed clear">
 	<thead>
 	<tr>
@@ -242,6 +258,34 @@ $("#tags").select2(\'val\', {$tagsJson});
 		array(
 			"title" => 'tags_box_tag_sized',
 			"template" => $db->escape_string(' <a href="{$tag[\'tag_link\']}" class="tag tag-h{$tag[\'size\']}">{$tag[\'name\']}</a>'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_forumdisplay_thread',
+			"template" => $db->escape_string('
+<div class="thread-tags">
+{$thread[\'first_tags\']}
+<span style="display: none;" id="tags-more-{$thread[\'tid\']}">{$thread[\'more_tags\']}</span>
+<a style="display:none;" id="tags-more-btn-{$thread[\'tid\']}" class="smalltext" href="#">
+({$lang->more_tags})
+</a>
+</div>
+<script>
+if(\'{$thread[\'more_tags_count\']}\' > 0) {
+	$("#tags-more-btn-{$thread[\'tid\']}").show();
+	$("#tags-more-btn-{$thread[\'tid\']}").click(function(){
+		$(this).hide();
+		$("#tags-more-{$thread[\'tid\']}").show();
+		return false;
+	});
+}
+</script>
+			'),
+			"sid" => "-1"
+		),
+		array(
+			"title" => 'tags_forumdisplay_thread_tag',
+			"template" => $db->escape_string('&nbsp;<a href="{$tag[\'tag_link\']}" class="tag tag-h7">{$tag[\'name\']}</a>'),
 			"sid" => "-1"
 		),
 		array(

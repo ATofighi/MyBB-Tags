@@ -99,10 +99,13 @@ class DBTagsSlug
 			return 0;
 		}
 		$last = $db->fetch_field($query, 'last');
+		if(!$last) {
+			return 0;
+		}
 		$last = str_replace($slug, '', $last);
 		$last = str_replace('--', '', $last);
 		$last = (int)$last;
-		if($last == 0) return 0;
+		if($last == 0) $last = 1;
 		return $last + 1;
 
 	}
@@ -138,8 +141,10 @@ class DBTagsSlug
 		foreach($tags as $tag) {
 			if(!DBTagsSlug::findByName($tag)) {
 				$slug = tags_slug($tag);
+				if(!$slug) {
+					$slug = 'empty';
+				}
 				$last = DBTagsSlug::getNewSlugNumber($slug);
-
 				if(!$last) {
 					$insert = array(
 						'name' => $db->escape_string($tag),

@@ -9,7 +9,7 @@ $plugins->add_hook("global_start", "tags_global_start");
 
 function tags_global_start()
 {
-	global $mybb;
+	global $mybb, $templates, $tags_css;
 	if($mybb->settings['tags_seo'])
 	{
 		if($mybb->settings['tags_urlscheme'] && strstr($mybb->settings['tags_urlscheme'], '{name}'))
@@ -32,4 +32,6 @@ function tags_global_start()
 	{
 		$mybb->settings['tags_enabled'] = 0;
 	}
+
+	eval('$tags_css = "'.$templates->get('tags_css').'";');
 }

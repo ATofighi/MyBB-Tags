@@ -8,4 +8,6 @@ function tags_deactivate()
 	find_replace_templatesets('showthread', '#'.preg_quote('<meta name="keywords" content="{$thread[\'tags_meta\']}" />').'#', '');
 	find_replace_templatesets('index', '#'.preg_quote('{$tags}').'#', '');
 	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$tags}').'#', '');
+	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('{$thread[\'tags\']}').'#', '');
+	find_replace_templatesets('headerinclude', '#'.preg_quote('{$tags_css}').'#', '');
 }

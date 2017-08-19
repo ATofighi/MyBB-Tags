@@ -4,9 +4,9 @@ function tags_activate()
 {
 	global $mybb, $db;
 	require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
-	
+
 	// add settings
-	
+
 	$query = $db->simple_select('settinggroups', 'gid', "name='tags'");
 	$gid = $db->fetch_field($query, 'gid');
 
@@ -100,6 +100,24 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"gid"			=> $gid
 		),
 		array(
+			"name"			=> "tags_forumdisplay_thread",
+			"title"			=> $db->escape_string('Show tags for each thread of "Forum Display" page?'),
+			"description"	=> $db->escape_string('Do you want tags shown for threads in "Forum Display" Page?'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_forumdisplay_thread", 1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
+			"name"			=> "tags_forumdisplay_thread_limit",
+			"title"			=> $db->escape_string('Maximum tags for a thread in "Forum display" page'),
+			"description"	=> $db->escape_string('Please enter the maximum number of tags that should be shown for threads in "Forum display" page. Set it to 0 for unlimited.'),
+			"optionscode"	=> "text",
+			"value"			=> tags_setting_value("tags_forumdisplay_thread_limit", 3),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
 			"name"			=> "tags_max_thread",
 			"title"			=> $db->escape_string('Maximun tags for a thread'),
 			"description"	=> $db->escape_string('Please enter the maximum number of tags for threads. Set it to 0 for unlimited.'),
@@ -180,4 +198,6 @@ c=>d
 	find_replace_templatesets('showthread', '#'.preg_quote('{$headerinclude}').'#', '<meta name="keywords" content="{$thread[\'tags_meta\']}" />{$headerinclude}');
 	find_replace_templatesets('index', '#'.preg_quote('{$forums}').'#', '{$forums}{$tags}');
 	find_replace_templatesets('forumdisplay', '#'.preg_quote('{$threadslist}').'#', '{$threadslist}{$tags}');
+	find_replace_templatesets('forumdisplay_thread', '#'.preg_quote('<div class="author smalltext">{$thread[\'profilelink\']}</div>').'#', '<div class="author smalltext">{$thread[\'profilelink\']}</div>{$thread[\'tags\']}');
+	find_replace_templatesets('headerinclude', '#'.preg_quote('{$stylesheets}').'#', '{$stylesheets}{$tags_css}');
 }
