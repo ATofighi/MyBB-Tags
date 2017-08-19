@@ -6,7 +6,7 @@ if(!defined("IN_MYBB"))
 }
 
 
-function tags_getbads($and = true, $prefix = true)
+function tags_getbads($and = true, $prefix = true, $not = true)
 {
 	global $mybb;
 	$b = $mybb->settings['tags_bad'];
@@ -31,14 +31,22 @@ function tags_getbads($and = true, $prefix = true)
 	{
 		$r .= 'tags.';
 	}
-	$r .= 'name NOT IN ('.implode(', ', $queryTags).')';
+	$r .= 'name';
+	if($not) {
+		$r .= ' NOT ';
+	}
+	$r .= ' IN ('.implode(', ', $queryTags).')';
 	if(count($queryTags))
 	{
 		return $r;
 	}
 	else
 	{
-		return '';
+		if($not) {
+			return '';
+		} else {
+			return '1=0';
+		}
 	}
 }
 

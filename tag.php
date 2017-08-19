@@ -29,7 +29,7 @@ $parser_options['me_username'] = 0;
 $parser_options['filter_badwords'] = 1;
 
 $lang->load('tags');
-
+// TODO: cli support
 if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 	if($mybb->get_input('action2') == 'upgrade') {
 		$from = $mybb->get_input('from', MyBB::INPUT_INT);
@@ -203,6 +203,13 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 			@flush();
 		}
 
+	}
+	elseif($mybb->get_input('action2') == 'remove_bads') {
+		// TODO: move to tasks
+		echo '<h1>Remove Bad Tags:</h1>';
+		$db->delete_query('tags', tags_getbads(false, false, false));
+		$db->delete_query('tags_slug', tags_getbads(false, false, false));
+		echo 'Done.';
 	}
 	// TODO: remove duplicated tags.
 
