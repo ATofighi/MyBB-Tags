@@ -68,6 +68,7 @@ $(\'input[name=subject]\').blur(function(){
 		});
 	}
 	$(\'#tags\').select2(\'val\', val);
+	$(\'#tags\').trigger(\'change\');
 });
 $("#tags").select2(\'val\', {$tagsJson});
 </script>'),
