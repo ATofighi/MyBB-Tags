@@ -43,7 +43,7 @@ function tags_info()
 		"website"		=> "https://github.com/ATofighi/MyBB-Tags",
 		"author"		=> "Alireza Tofighi",
 		"authorsite"	=> "",
-		"version"		=> "3.0.2",
+		"version"		=> "3.0.3",
 		"compatibility" => "18*"
 	);
 
