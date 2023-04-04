@@ -35,17 +35,27 @@ if(defined('THIS_SCRIPT') && in_array(THIS_SCRIPT, array('tag.php', 'showthread.
 
 function tags_info()
 {
-	global $lang;
+	global $lang, $mybb;
 	$lang->load('tags');
-	return array(
+	$info = array(
 		"name"			=> $lang->tags_pluginname,
 		"description"	=> '',
-		"website"		=> "http://myb-b.ir",
-		"author"		=> "My-BB.Ir Group",
-		"authorsite"	=> "http://my-bb.ir",
-		"version"		=> "3.0.1",
+		"website"		=> "https://github.com/ATofighi/MyBB-Tags",
+		"author"		=> "Alireza Tofighi",
+		"authorsite"	=> "",
+		"version"		=> "3.0.2",
 		"compatibility" => "18*"
 	);
+
+	if (tags_is_installed() && $mybb->settings['tags_enabled'])
+	{
+		$info['description'] .= '<br /><Strong>Admin Actions:</strong><br /><ul>';
+		$info['description'] .= '<li><a href="'.$mybb->settings['bburl'].'/tag.php?action=admin&action2=make_tags" target="_blank">Create tags for current topics</a></li>';
+		$info['description'] .= '<li><a href="'.$mybb->settings['bburl'].'/tag.php?action=admin&action2=recount" target="_blank">Recount tags</a></li>';
+		$info['description'] .= '</ul>';
+	}
+	return $info;
+	
 }
 
 require_once TAGS_ROOT.'/autoload.php';

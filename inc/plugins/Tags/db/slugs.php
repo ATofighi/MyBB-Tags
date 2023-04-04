@@ -7,7 +7,7 @@ if(!defined("IN_MYBB"))
 
 class DBTagsSlug
 {
-	static function get($select = '*', $where = '', $opt = array())
+	static function get($where = '', $opt = array())
 	{
 		global $db;
 		$unviewable = DBTags::getUnviewable('threads');;
@@ -25,19 +25,17 @@ class DBTagsSlug
 
 		$where = "({$where}) AND threads.tid != '0' AND threads.visible = '1' AND threads.closed NOT LIKE 'moved|%' AND {$unviewable}".tags_getbads();
 
-		$query = "SELECT {$select} FROM `".TABLE_PREFIX."tags_slug` slugs\n";
-		$query .= "LEFT JOIN `".TABLE_PREFIX."tags` tags on(tags.name = slugs.name)\n";
-		$query .= "LEFT JOIN `".TABLE_PREFIX."threads` threads on(tags.tid = threads.tid)\n";
+		$query = "SELECT slugs.slug, slugs.name, slugs.count, COUNT(threads.tid) as tcount FROM ".TABLE_PREFIX."tags_slug slugs\n";
+		$query .= "LEFT JOIN ".TABLE_PREFIX."tags tags on(tags.name = slugs.name)\n";
+		$query .= "LEFT JOIN ".TABLE_PREFIX."threads threads on(tags.tid = threads.tid)\n";
 		$query .= "WHERE ".$where."\n";
 
-		if($opt['groupBy'])
-		{
-			$query .= "group by {$opt['groupBy']}\n";
-		}
+		$query .= "group by slugs.slug, slugs.name, slugs.count \n";
+		$query .= "having tcount > 0 \n";
 		if($opt['orderBy'])
 		{
 			if(strstr($opt['orderBy'], '.')) {
-				$opt['orderBy'] = '`'.TABLE_PREFIX.$opt['orderBy'].'`';
+				$opt['orderBy'] = ''.TABLE_PREFIX.$opt['orderBy'].'';
 			}
 			$query .= "order by {$opt['orderBy']} {$opt['orderType']}\n";
 		}
@@ -46,30 +44,14 @@ class DBTagsSlug
 			$query .= "limit {$opt['limit']}\n";
 		}
 
-
 		return $db->query($query);
-	}
-
-	static function count($where = '', $select = '')
-	{
-		global $db;
-		if($select)
-		{
-			$select .= ', ';
-		}
-		$dbTags = new DBTagsSlug;
-		$query = $dbTags->get($select.'COUNT(slugs.slug) as slugsCount', $where, array(
-			'groupBy' => ''
-		));
-
-		return $db->fetch_field($query, 'slugsCount');
 	}
 
 	static function find($id)
 	{
 		global $db;
 		$dbTags = new DBTagsSlug;
-		$query = $dbTags->get('*', 'slugs.id = '.(int)$id);
+		$query = $dbTags->get('slugs.id = '.(int)$id);
 		return $db->fetch_array($query);
 	}
 
@@ -77,7 +59,7 @@ class DBTagsSlug
 	{
 		global $db;
 		$dbTags = new DBTagsSlug;
-		$query = $dbTags->get('*', "slugs.slug = '".$db->escape_string($slug)."'");
+		$query = $dbTags->get("slugs.slug = '".$db->escape_string($slug)."'");
 		return $db->fetch_array($query);
 	}
 
@@ -86,7 +68,7 @@ class DBTagsSlug
 	{
 		global $db;
 		$dbTags = new DBTagsSlug;
-		$query = $dbTags->get('*', "slugs.name = '".$db->escape_string($name)."'");
+		$query = $dbTags->get("slugs.name = '".$db->escape_string($name)."'");
 		return $db->fetch_array($query);
 	}
 
@@ -118,14 +100,14 @@ class DBTagsSlug
 
 	static function plusPlus($names) {
 		global $db;
-		$db->query("UPDATE `".TABLE_PREFIX."tags_slug`
+		$db->query("UPDATE ".TABLE_PREFIX."tags_slug
 					SET count = count + 1
 					WHERE name IN (".tags_in_query($names).")");
 	}
 
 	static function minusMinus($names) {
 		global $db;
-		$db->query("UPDATE `".TABLE_PREFIX."tags_slug`
+		$db->query("UPDATE ".TABLE_PREFIX."tags_slug
 					SET count = count - 1
 					WHERE name IN (".tags_in_query($names).")");
 	}

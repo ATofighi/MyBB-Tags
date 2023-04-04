@@ -99,15 +99,17 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 	    @flush();
 
 	    $query = $db->simple_select("threads", "tid, subject", "", array('limit_start' => $lower, 'limit' => $limit));
-
+		
 	    $tags = array();
 		$insert = array();
+		$tids = array();
 
 	    while($row = $db->fetch_array($query)) {
+			$tids[] = $row['tid'];
 	    	$subject = $row['subject'];
 			$newTags = preg_replace("#([".preg_quote("+,./-%")."]+)#is", " ", $subject);
 			$newTags = trim($newTags);
-			$newTags = explode(' ', $newTags);
+			$newTags = array_unique(explode(' ', $newTags));
 			foreach($newTags as $tag) {
 				if($tag) {
 					$tags[] = $tag;
@@ -119,10 +121,27 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 			}
 	    }
 
+		$currentTags = array();
+		if(!empty($tids))
+		{
+			$query = $db->simple_select("tags", "tid, name", "tid IN (".implode(",", $tids).")");
+			while($row = $db->fetch_array($query))
+			{
+				$currentTags[] = array(
+					'tid' => $row['tid'],
+					'name' => $row['name']
+				);
+			}
+		}
+
 		array_unique($tags);
 
-		$db->insert_query_multiple('tags', $insert);
+		$insert = array_diff($insert, $currentTags);
 
+		if(!empty($insert))
+		{
+			$db->insert_query_multiple('tags', $insert);
+		}
 	    DBTagsSlug::newSlugs($tags);
 
 	    echo "<p>Done.</p>";
@@ -234,7 +253,9 @@ if($mybb->get_input('action') == 'sitemap-index')
 {
 	$bad_tags = tags_getbads(true);
 
-	$count = DBTagsSlug::count();
+
+	$query = $db->simple_select('tags_slug', 'COUNT(slug) as slugsCount', "", array("limit" => 1));
+	$count = $db->fetch_field($query, 'slugsCount');
 	$pages = $count / 300; // TODO: sitemap per page
 	$pages = ceil($pages);
 	$sitemaps = '';
@@ -265,7 +286,7 @@ elseif($mybb->get_input('action') == 'sitemap')
 
 	$start = ($page-1) * 300;
 
-	$query = DBTagsSlug::get("*", '', array(
+	$query = DBTagsSlug::get('', array(
 		'orderBy' => 'count',
 		'orderType' => 'DESC',
 		'limit' => "{$start}, 300"
@@ -369,7 +390,6 @@ else
 		"threads.tid, posts.message, posts.username, posts.uid, threads.subject, threads.views, threads.replies",
 		"tags.name = '".$db->escape_string($name)."'",
 		array(
-			'groupBy' => 'threads.tid',
 			'limit' => "{$start}, {$mybb->settings['tags_per_page']}"
 		)
 	);

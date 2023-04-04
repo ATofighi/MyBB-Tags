@@ -34,7 +34,6 @@ function tags_forumdisplay_end()
 		"threads.fid = '{$fid}'",
 		array(
 			'orderBy' => $order_by,
-			'groupBy' => 'slugs.name',
 			'orderType' => '',
 			'limit' => "0, {$mybb->settings['tags_limit']}"
 		)
@@ -75,10 +74,7 @@ function tags_forumdisplay_thread_end() {
 		$tagsCache = array();
 		$query = DBTags::get(
 			'tags.name, slugs.slug, threads.tid',
-			"threads.tid IN ({$tids})",
-			array(
-				'groupBy' => 'tags.name, threads.tid'
-			)
+			"threads.tid IN ({$tids})"
 		);
 
 		while($row = $db->fetch_array($query)) {
