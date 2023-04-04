@@ -23,11 +23,7 @@ function tags_showthread()
 	$thread['tags'] = array();
 
 	$query = DBTags::get("tags.name, slugs.slug",
-						 "threads.tid = '{$tid}'",
-						 array(
-				 			'groupBy' => 'slugs.slug'
-						)
-					);
+						 "threads.tid = '{$tid}'"					);
 	while($tag = $db->fetch_array($query))
 	{
 		$thread['tags'][] = $tag;

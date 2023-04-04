@@ -38,6 +38,9 @@ $("#tags").select2({
 	width: \'100%\',
 	data: {$tagsData}
 }).change(function(data){
+	if(!data.val) {
+		data.val = $(\'#tags\').select2(\'val\');
+	}
 	$(\'#tags-inputs\').html(\'\');
 	for(val in data.val) {
 		var input = $(\'<input />\');
@@ -408,13 +411,13 @@ if(\'{$thread[\'more_tags_count\']}\' > 0) {
 	{
 		if($db->type == 'pgsql')
 		{
-			$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags` (
-					`id` serial,
-					`tid` int NOT NULL default '0',
-					`name` varchar(200)  NOT NULL default '',
-					`hash` varchar(200)  NOT NULL default '',
-					PRIMARY KEY  (`id`)
-				) ENGINE=MyISAM{$collation}");
+			$db->write_query("CREATE TABLE ".TABLE_PREFIX."tags (
+					id serial,
+					tid int NOT NULL default '0',
+					name varchar(200)  NOT NULL default '',
+					PRIMARY KEY  (id),
+					UNIQUE (tid, name)
+				) {$collation}");
 		}
 		else
 		{
@@ -422,8 +425,8 @@ if(\'{$thread[\'more_tags_count\']}\' > 0) {
 					`id` int(10) UNSIGNED NOT NULL auto_increment,
 					`tid` int(100) UNSIGNED NOT NULL default '0',
 					`name` varchar(200)  NOT NULL default '',
-					`hash` varchar(200)  NOT NULL default '',
-					PRIMARY KEY  (`id`)
+					PRIMARY KEY  (`id`),
+					UNIQUE KEY tidname (tid, name)
 				) ENGINE=MyISAM{$collation}");
 		}
 	}
@@ -432,13 +435,13 @@ if(\'{$thread[\'more_tags_count\']}\' > 0) {
 	{
 		if($db->type == 'pgsql')
 		{
-			$db->write_query("CREATE TABLE `".TABLE_PREFIX."tags_slug` (
-					`name` varchar(200)  NOT NULL default '',
-					`slug` varchar(200)  NOT NULL default '',
-					`count` int NOT NULL default '0',
-					UNIQUE KEY (`name`),
-					UNIQUE KEY (`slug`)
-				) ENGINE=MyISAM{$collation}");
+			$db->write_query("CREATE TABLE ".TABLE_PREFIX."tags_slug (
+					name varchar(200)  NOT NULL default '',
+					slug varchar(200)  NOT NULL default '',
+					count int NOT NULL default '0',
+					UNIQUE (name),
+					UNIQUE (slug)
+				) {$collation}");
 		}
 		else
 		{

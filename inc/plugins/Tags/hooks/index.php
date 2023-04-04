@@ -29,10 +29,8 @@ function tags_index_start()
 	}
 
 	$query = DBTagsSlug::get(
-		"*",
 		"",
 		array(
-			'groupBy' => 'slugs.slug',
 			'orderBy' => $order_by,
 			'orderType' => '',
 			'limit' => "0, {$mybb->settings['tags_limit']}"
