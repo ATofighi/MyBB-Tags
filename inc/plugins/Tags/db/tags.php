@@ -7,7 +7,7 @@ if(!defined("IN_MYBB"))
 
 class DBTags
 {
-	function getUnviewable($tableName = '')
+	static function getUnviewable($tableName = '')
 	{
 		global $db;
 
