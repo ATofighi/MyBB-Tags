@@ -82,6 +82,15 @@ RewriteRule <strong>^tag\.html$ tag.php</strong> <em>[L,QSA]</em>
 			"gid"			=> $gid
 		),
 		array(
+			"name"			=> "tags_hooksearch",
+			"title"			=> $db->escape_string('Search for Tags in forum search?'),
+			"description"	=> $db->escape_string('Do you want to automatically search for threads with corresponding tags?'),
+			"optionscode"	=> "yesno",
+			"value"			=> tags_setting_value("tags_hooksearch", 1),
+			"disporder"		=> ++$i,
+			"gid"			=> $gid
+		),
+		array(
 			"name"			=> "tags_index",
 			"title"			=> $db->escape_string('Show tags in Index Page?'),
 			"description"	=> $db->escape_string('Do you want tags shown in Index Page?'),
