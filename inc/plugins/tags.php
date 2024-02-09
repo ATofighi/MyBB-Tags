@@ -50,6 +50,7 @@ function tags_info()
 	if (tags_is_installed() && $mybb->settings['tags_enabled'])
 	{
 		$info['description'] .= '<br /><Strong>Admin Actions:</strong><br /><ul>';
+		$info['description'] .= '<li><a href="'.$mybb->settings['bburl'].'/tag.php?action=admin&action2=recreateSlugs" target="_blank">Create missing Slugs</a></li>';
 		$info['description'] .= '<li><a href="'.$mybb->settings['bburl'].'/tag.php?action=admin&action2=make_tags" target="_blank">Create tags for current topics</a></li>';
 		$info['description'] .= '<li><a href="'.$mybb->settings['bburl'].'/tag.php?action=admin&action2=recount" target="_blank">Recount tags</a></li>';
 		$info['description'] .= '</ul>';
