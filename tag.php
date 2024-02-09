@@ -233,6 +233,20 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 		$db->delete_query('tags_slug', tags_getbads(false, false, false));
 		echo 'Done.';
 	}
+	elseif($mybb->get_input('action2') == 'recreateSlugs') {
+		echo "<h1>Generate missing slugs</h1><br/>";
+		$query = DBTags::get('tags.name');
+		$tags = array();
+		while($tag = $db->fetch_array($query))
+		{
+			array_push($tags, $tag['name']);
+		}
+		echo "Creating slugs: "  .count($tags) . "<br />";
+
+		if(count($tags)>0)
+			DBTagsSlug::newSlugs($tags);
+		echo "Done.";
+	}
 	// TODO: remove duplicated tags.
 
 	exit;
