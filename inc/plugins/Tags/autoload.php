@@ -38,6 +38,7 @@ require_once TAGS_ROOT.'/hooks/index.php';
 require_once TAGS_ROOT.'/hooks/portal.php';
 require_once TAGS_ROOT.'/hooks/newthread.php';
 require_once TAGS_ROOT.'/hooks/editpost.php';
+require_once TAGS_ROOT.'/hooks/search.php';
 require_once TAGS_ROOT.'/hooks/showthread.php';
 require_once TAGS_ROOT.'/hooks/forumdisplay.php';
 require_once TAGS_ROOT.'/hooks/datahandler_post.php';

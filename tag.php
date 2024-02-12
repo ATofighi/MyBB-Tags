@@ -197,18 +197,21 @@ if($mybb->get_input('action') == 'admin' && $mybb->usergroup['cancp']) {
 			$count[$row['name']] = 0;
 	    }
 
-		$query = $db->simple_select("tags", "*", "name IN (".tags_in_query($names).")");
+			if(!empty($names) && !empty($count)) {
 
-		while($row = $db->fetch_array($query)) {
-			$count[$row['name']]++;
-		}
-
-
-		foreach($count as $name => $val) {
-			$db->update_query("tags_slug", array("count" => (int)$val),
-			 	"name='".$db->escape_string($name)."'");
-		}
-
+				$query = $db->simple_select("tags", "*", "name IN (".tags_in_query($names).")");
+				
+				while($row = $db->fetch_array($query)) {
+					$count[$row['name']]++;
+				}
+				
+				
+				foreach($count as $name => $val) {
+					$db->update_query("tags_slug", array("count" => (int)$val),
+					"name='".$db->escape_string($name)."'");
+				}
+				
+			}
 
 	    echo "<p>Done.</p>";
 
